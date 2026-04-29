@@ -1,3 +1,5 @@
+import {bunApi} from '../utils/requestGenerator'
+
 export const uploadImageToOss = () => {
     return bunApi("/chat/a")
 } 
