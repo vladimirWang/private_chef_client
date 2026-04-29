@@ -18,7 +18,7 @@ import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 
-export default function AssistantPage() {
+export default function ChatPage() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Message[]>([]);
   const [processing, setProcessing] = useState(false);
