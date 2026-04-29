@@ -13,15 +13,14 @@ import {
   Typography,
 } from "@mui/material";
 import AuthShell from "@/components/auth/AuthShell";
-import { loginAccount } from "@/lib/auth/loginAccount";
-import axios from 'axios'
+import {userLogin} from '@/api/user'
 
 function postLoginPathFromWindow(search: string): string {
   const raw = new URLSearchParams(search).get("from")?.trim() ?? "";
   if (raw.startsWith("/") && !raw.startsWith("//") && !raw.includes("\0")) {
     return raw;
   }
-  return "/assistant";
+  return "/chat";
 }
 
 function RegisteredBanner() {
@@ -35,8 +34,8 @@ function RegisteredBanner() {
 export default function LoginForm() {
   const navigate = useNavigate();
   const [search] = useSearchParams();
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
+  const [email, setEmail] = React.useState("413114463@qq.com");
+  const [password, setPassword] = React.useState("12345678");
   const [remember, setRemember] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [formError, setFormError] = React.useState<string | null>(null);
@@ -46,16 +45,14 @@ export default function LoginForm() {
     setFormError(null);
     setSubmitting(true);
     try {
-      const result = await loginAccount({
+      const result = await userLogin({
         email: email.trim(),
         password,
-        remember,
+        // remember,
       });
-      if (result.ok) {
-        navigate(postLoginPathFromWindow(search.toString()), { replace: true });
-        return;
-      }
-      setFormError(result.error);
+      console.log("result: ", result)
+      navigate(postLoginPathFromWindow(search.toString()), { replace: true });
+      // setFormError(result.error);
     } finally {
       setSubmitting(false);
     }
@@ -142,13 +139,6 @@ export default function LoginForm() {
               "登录"
             )}
           </Button>
-          <button onClick={() => {
-            axios.get("/api").then(res => {
-              console.log("success: ", res)
-            }).catch(e => {
-              console.log("fail: ", e)
-            })
-          }}>test</button>
         </Stack>
       </Box>
     </AuthShell>

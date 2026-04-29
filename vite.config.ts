@@ -19,10 +19,10 @@ export default defineConfig({
   server: {
     port: 5174,
     proxy: {
-      '/api': {
+      '/bun_api': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        rewrite: (path) => path.replace(/^\/bun_api/, ''),
       },
     },
   },

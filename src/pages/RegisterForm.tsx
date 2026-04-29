@@ -11,7 +11,7 @@ import {
   TextField,
 } from "@mui/material";
 import AuthShell from "@/components/auth/AuthShell";
-import { registerAccount } from "@/lib/auth/registerAccount";
+import { userRegister } from "@/api/user";
 
 export default function RegisterForm() {
   const navigate = useNavigate();
@@ -36,10 +36,10 @@ export default function RegisterForm() {
     }
     setSubmitting(true);
     try {
-      const result = await registerAccount({
+      const result = await userRegister({
         email: email.trim(),
         password,
-        nickname: displayName.trim() || undefined,
+        nickname: displayName.trim(),
       });
       if (result.ok) {
         navigate("/login?registered=1", { replace: true });
