@@ -18,5 +18,9 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    // 不希望在 client 端因未使用变量/参数阻塞开发
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+    },
   },
 ])
