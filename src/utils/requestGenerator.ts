@@ -159,4 +159,4 @@ export const requestGenerator = (baseUrl: string) => {
 };
 
 
-export const bunApi = requestGenerator("/bun_api");
+export const bunApi = requestGenerator("/api");
