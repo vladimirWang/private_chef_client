@@ -64,7 +64,7 @@ export const requestGenerator = (baseUrl: string) => {
 					// 成功：根据配置决定是否显示提示
 					const showSuccessMessage =
 						config.showSuccessMessage ??
-						(["post", "put", "patch", "delete"].includes(config.method) ? true : false);
+						(["post", "put", "patch", "delete"].includes(config.method as string) ? true : false);
 					if (showSuccessMessage && msg) {
 						// message.success(msg);
 					}
@@ -142,7 +142,7 @@ export const requestGenerator = (baseUrl: string) => {
 			// 网络错误或其他错误
 			const errorMessage = error.message || "网络错误";
 			if (showErrorMessage) {
-				message.error(errorMessage);
+				// message.error(errorMessage);
 			}
 			return Promise.reject({
 				code: 0,
