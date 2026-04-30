@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import type { Message } from "@/types/chat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
-import { uploadImageToOss, streamChat, clearChatHistory } from "../api/chat";
+import { uploadFile } from "../api/util";
+import { streamChatNew, clearChatHistory } from "../api/chat";
 import { generateUUID } from "@/utils/common";
 // import { apiUrl } from "@/lib/appOrigin";
 import { UtensilsCrossed, Plus, Menu, User } from "lucide-react";
@@ -17,6 +18,7 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
+import { streamChat } from "@/utils/streamChat";
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -76,74 +78,86 @@ export default function ChatPage() {
   };
 
   const handleSend = async (text: string, file?: File) => {
-    // if (processing) return;
+    if (processing) return;
 
-    // let imageUrl: string | undefined;
+    let imageUrl: string | undefined;
+    const messageText =
+      text?.trim() || (file ? "这是我冰箱里的食物，帮我看看能做什么佳肴？" : "");
+    if (!messageText && !file) return;
 
-    // if (file) {
-    //   try {
-    //     imageUrl = await uploadImageToOss(file);
-    //   } catch (error) {
-    //     console.error("图片上传失败:", error);
-    //     addMessage({
-    //       role: "assistant",
-    //       content: "图片上传失败，请稍后重试。",
-    //     });
-    //     return;
-    //   }
-    // }
+    if (file) {
+      try {
+        const uploadResponse = await uploadFile(file);
+        imageUrl = uploadResponse.url;
+        console.log("imageUrl 0: ", imageUrl);
+      } catch (error) {
+        console.error("图片上传失败:", error);
+        addMessage({
+          role: "assistant",
+          content: "图片上传失败，请稍后重试。",
+        });
+        return;
+      }
+    }
+    console.log("imageUrl 1: ", imageUrl);
 
-    // addMessage({
-    //   role: "user",
-    //   content: text || "上传了一张食材图片",
-    //   imageUrl,
-    // });
+    addMessage({
+      role: "user",
+      content: text || "上传了一张食材图片",
+      imageUrl,
+    });
 
-    // setProcessing(true);
+    setProcessing(true)
+    const assistantMessageId = addMessage({
+      role: "assistant",
+      content: "",
+      streaming: true,
+    }).id;
 
-    // const assistantMessageId = addMessage({
-    //   role: "assistant",
-    //   content: "",
-    //   streaming: true,
-    // }).id;
-
-    // try {
-    //   await streamChat(
-    //     text || "这是我冰箱里的食物，帮我看看能做什么佳肴？",
-    //     (chunk) => {
-    //       setMessages((prev) =>
-    //         prev.map((msg) =>
-    //           msg.id === assistantMessageId ? { ...msg, content: msg.content + chunk } : msg
-    //         )
-    //       );
-    //     },
-    //     imageUrl,
-    //     (error) => {
-    //       console.error("聊天失败:", error);
-    //       setMessages((prev) =>
-    //         prev.map((msg) =>
-    //           msg.id === assistantMessageId
-    //             ? {
-    //                 ...msg,
-    //                 content: msg.content + `\n[错误]: ${error.message}`,
-    //                 streaming: false,
-    //               }
-    //             : msg
-    //         )
-    //       );
-    //     },
-    //     () => {
-    //       setMessages((prev) =>
-    //         prev.map((msg) =>
-    //           msg.id === assistantMessageId ? { ...msg, streaming: false } : msg
-    //         )
-    //       );
-    //     },
-    //     threadId
-    //   );
-    // } finally {
-    //   setProcessing(false);
-    // }
+    const controller = new AbortController();
+    console.log("imageUrl 2: ", imageUrl);
+    try {
+      await streamChat(
+          text || "这是我冰箱里的食物，帮我看看能做什么佳肴？",
+          (chunk) => {
+              // 更新消息内容
+              setMessages((prev) =>
+                  prev.map((msg) =>
+                      msg.id === assistantMessageId
+                          ? {...msg, content: msg.content + chunk}
+                          : msg
+                  )
+              );
+          }, imageUrl,
+          (error) => {
+              console.error("聊天失败:", error);
+              setMessages((prev) =>
+                  prev.map((msg) =>
+                      msg.id === assistantMessageId
+                          ? {
+                              ...msg,
+                              content: msg.content + `\n[错误]: ${error.message}`,
+                              streaming: false,
+                          }
+                          : msg
+                  )
+              );
+          },
+          () => {
+              // 流式输出完成
+              setMessages((prev) =>
+                  prev.map((msg) =>
+                      msg.id === assistantMessageId
+                          ? {...msg, streaming: false}
+                          : msg
+                  )
+              );
+          },
+          threadId
+      );
+  } finally {
+      setProcessing(false);
+  }
   };
 
   return (
