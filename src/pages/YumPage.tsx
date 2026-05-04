@@ -1,12 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import type { Message } from "@/types/chat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { uploadFile } from "../api/util";
-import { streamChatNew, clearChatHistory } from "../api/chat";
+import { clearChatHistory } from "../api/chat";
 import { generateUUID } from "@/utils/common";
-// import { apiUrl } from "@/lib/appOrigin";
 import { UtensilsCrossed, Plus, Menu, User } from "lucide-react";
 import Drawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
@@ -18,10 +16,15 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import IconButton from "@mui/material/IconButton";
 import { streamChat } from "@/utils/streamChat";
+import { homeCardSurfaceSx, pageShellSx } from "@/theme/homeChrome";
 
-export default function ChatPage() {
-  const navigate = useNavigate();
+const CONTENT_MAX_PX = 896;
+
+export default function YumPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [processing, setProcessing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,13 +56,7 @@ export default function ChatPage() {
   };
 
   const handleLogout = async () => {
-    // try {
-    //   await fetch(apiUrl("/api/auth/logout"), { method: "POST", credentials: "include" });
-    // } catch {
-    //   // 仍跳转登录页
-    // }
-    // setMenuOpen(false);
-    // navigate("/login", { replace: true });
+    // 预留：对接登出接口后跳转登录
   };
 
   useEffect(() => {
@@ -107,61 +104,63 @@ export default function ChatPage() {
       imageUrl,
     });
 
-    setProcessing(true)
+    setProcessing(true);
     const assistantMessageId = addMessage({
       role: "assistant",
       content: "",
       streaming: true,
     }).id;
 
-    const controller = new AbortController();
-    console.log("imageUrl 2: ", imageUrl);
     try {
       await streamChat(
-          text || "这是我冰箱里的食物，帮我看看能做什么佳肴？",
-          (chunk) => {
-              // 更新消息内容
-              setMessages((prev) =>
-                  prev.map((msg) =>
-                      msg.id === assistantMessageId
-                          ? {...msg, content: msg.content + chunk}
-                          : msg
-                  )
-              );
-          }, imageUrl,
-          (error) => {
-              console.error("聊天失败:", error);
-              setMessages((prev) =>
-                  prev.map((msg) =>
-                      msg.id === assistantMessageId
-                          ? {
-                              ...msg,
-                              content: msg.content + `\n[错误]: ${error.message}`,
-                              streaming: false,
-                          }
-                          : msg
-                  )
-              );
-          },
-          () => {
-              // 流式输出完成
-              setMessages((prev) =>
-                  prev.map((msg) =>
-                      msg.id === assistantMessageId
-                          ? {...msg, streaming: false}
-                          : msg
-                  )
-              );
-          },
-          threadId
+        text || "这是我冰箱里的食物，帮我看看能做什么佳肴？",
+        (chunk) => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: msg.content + chunk }
+                : msg
+            )
+          );
+        },
+        imageUrl,
+        (error) => {
+          console.error("聊天失败:", error);
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? {
+                    ...msg,
+                    content: msg.content + `\n[错误]: ${error.message}`,
+                    streaming: false,
+                  }
+                : msg
+            )
+          );
+        },
+        () => {
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId ? { ...msg, streaming: false } : msg
+            )
+          );
+        },
+        threadId
       );
-  } finally {
+    } finally {
       setProcessing(false);
-  }
+    }
   };
 
   return (
-    <div className="min-h-screen relative">
+    <Box
+      sx={{
+        ...pageShellSx,
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      }}
+    >
       <Drawer
         anchor="left"
         open={menuOpen}
@@ -174,6 +173,7 @@ export default function ChatPage() {
               height: "100%",
               borderRight: "1px solid",
               borderColor: "divider",
+              bgcolor: "background.paper",
               display: "flex",
               flexDirection: "column",
             },
@@ -202,6 +202,9 @@ export default function ChatPage() {
               <ListItemButton
                 onClick={() => {
                   void handleNewChat();
+                }}
+                sx={{
+                  "&:hover": { bgcolor: "action.hover" },
                 }}
               >
                 <ListItemIcon sx={{ minWidth: 40 }}>
@@ -256,72 +259,164 @@ export default function ChatPage() {
         </Box>
       </Drawer>
 
-      <div className="fixed inset-0 bg-gradient-to-br from-amber-50 via-orange-50 to-red-50" />
-      <div className="fixed inset-0 opacity-30">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-xl animate-pulse" />
-        <div
-          className="absolute top-40 right-10 w-96 h-96 bg-amber-200 rounded-full mix-blend-multiply filter blur-xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute bottom-20 left-1/3 w-80 h-80 bg-red-100 rounded-full mix-blend-multiply filter blur-xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-      </div>
-
-      <header className="fixed top-0 left-0 right-0 z-50">
-        <div className="max-w-4xl mx-auto bg-white shadow-lg border border-white/50 px-4 sm:px-6 py-2 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-            <button
+      <Box
+        sx={{
+          pt: 2,
+          px: 2,
+          pb: 1,
+          maxWidth: CONTENT_MAX_PX,
+          width: "100%",
+          mx: "auto",
+          flexShrink: 0,
+        }}
+      >
+        <Card elevation={0} sx={{ ...homeCardSurfaceSx }}>
+          <CardContent
+            sx={{
+              py: 1.25,
+              px: 1.5,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              "&:last-child": { pb: 1.25 },
+            }}
+          >
+            <IconButton
               type="button"
               onClick={() => setMenuOpen(true)}
-              className="shrink-0 p-2 -ml-1 rounded-xl text-gray-600 hover:bg-orange-50 hover:text-orange-700 transition-colors"
               aria-label="打开菜单"
+              size="small"
+              sx={{ color: "text.secondary" }}
             >
               <Menu size={22} strokeWidth={2} />
-            </button>
-            <div className="text-center">
-              <span className="text-xl font-bold text-center">美食助手</span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => void handleNewChat()}
-            className="flex items-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition-colors"
-          >
-            <Plus size={18} />
-          </button>
-        </div>
-      </header>
+            </IconButton>
+            <Typography
+              variant="h6"
+              sx={{ flex: 1, textAlign: "center", fontWeight: 700 }}
+            >
+              美食助手
+            </Typography>
+            <Button
+              type="button"
+              variant="contained"
+              size="small"
+              onClick={() => void handleNewChat()}
+              sx={{ minWidth: 40, px: 1 }}
+              aria-label="新建会话"
+            >
+              <Plus size={18} />
+            </Button>
+          </CardContent>
+        </Card>
+      </Box>
 
-      <div className="relative flex flex-col min-h-screen max-w-4xl mx-auto px-4 pt-12 pb-24">
-        <div className="flex-1 bg-white/60 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 overflow-hidden flex flex-col">
-          <div className="flex-1 overflow-y-auto p-4">
+      <Box
+        sx={{
+          flex: 1,
+          maxWidth: CONTENT_MAX_PX,
+          mx: "auto",
+          width: "100%",
+          px: 2,
+          pt: 2,
+          pb: 24,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Card
+          elevation={0}
+          sx={{
+            ...homeCardSurfaceSx,
+            flex: 1,
+            minHeight: { xs: "50vh", sm: 420 },
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <CardContent
+            sx={{
+              flex: 1,
+              overflow: "auto",
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+              "&:last-child": { pb: 2 },
+            }}
+          >
             {messages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-gray-400 mt-3">
-                <div className="p-4 bg-white/80 rounded-full mb-4">
-                  <UtensilsCrossed size={48} className="text-orange-400" />
-                </div>
-                <p className="text-lg font-medium text-gray-600">上传食材图片开始吧</p>
-                <p className="text-sm mt-2 text-gray-400">我会帮您识别食材并推荐食谱</p>
-              </div>
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  py: 4,
+                  color: "text.secondary",
+                }}
+              >
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: "50%",
+                    bgcolor: "background.default",
+                    mb: 2,
+                    display: "flex",
+                  }}
+                >
+                  <UtensilsCrossed
+                    size={48}
+                    strokeWidth={1.5}
+                    color="currentColor"
+                    style={{ color: "var(--mui-palette-primary-main)" }}
+                  />
+                </Box>
+                <Typography
+                  variant="h6"
+                  sx={{ color: "text.primary", fontWeight: 600 }}
+                >
+                  上传食材图片开始吧
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  我会帮您识别食材并推荐食谱
+                </Typography>
+              </Box>
             ) : (
-              <div className="space-y-4">
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {messages.map((message) => (
                   <ChatMessage key={message.id} message={message} />
                 ))}
                 <div ref={messagesEndRef} />
-              </div>
+              </Box>
             )}
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      </Box>
 
-      <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-        <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50">
-          <ChatInput onSend={handleSend} disabled={processing} />
-        </div>
-      </div>
-    </div>
+      <Box
+        sx={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          p: 2,
+          zIndex: 50,
+          pointerEvents: "none",
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: CONTENT_MAX_PX,
+            mx: "auto",
+            pointerEvents: "auto",
+          }}
+        >
+          <Card elevation={0} sx={{ ...homeCardSurfaceSx }}>
+            <ChatInput onSend={handleSend} disabled={processing} />
+          </Card>
+        </Box>
+      </Box>
+    </Box>
   );
 }

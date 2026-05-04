@@ -1,5 +1,8 @@
-import { useState, useRef, type ChangeEvent, type KeyboardEvent } from "react";
+import { useState, useRef, useEffect, type ChangeEvent, type KeyboardEvent } from "react";
 import { Image, Send, X } from "lucide-react";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
 
 interface ChatInputProps {
   onSend: (text: string, file?: File) => void;
@@ -9,7 +12,18 @@ interface ChatInputProps {
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | undefined>();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // useEffect(() => {
+  //   if (!file) {
+  //     setPreviewUrl(null);
+  //     return undefined;
+  //   }
+  //   const url = URL.createObjectURL(file);
+  //   setPreviewUrl(url);
+  //   return () => URL.revokeObjectURL(url);
+  // }, [file]);
 
   const handleSend = () => {
     if (text.trim() || file) {
@@ -22,7 +36,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -37,60 +51,106 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   };
 
   return (
-    <div className="border-t border-gray-200/50 bg-white/80 p-4">
-      {file ? (
-        <div className="mb-3 flex items-center gap-2">
-          <div className="relative">
-            <img
-              src={URL.createObjectURL(file)}
+    <Box sx={{ p: 2, bgcolor: "background.paper" }}>
+      {file && previewUrl ? (
+        <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ position: "relative", display: "inline-block" }}>
+            <Box
+              component="img"
+              src={previewUrl}
               alt="预览"
-              className="max-w-24 max-h-24 rounded-lg object-cover"
+              sx={{
+                maxWidth: 96,
+                maxHeight: 96,
+                borderRadius: 2,
+                objectFit: "cover",
+                display: "block",
+              }}
             />
-            <button
+            <IconButton
               type="button"
+              size="small"
               onClick={() => setFile(undefined)}
-              className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+              sx={{
+                position: "absolute",
+                top: -8,
+                right: -8,
+                bgcolor: "error.main",
+                color: "error.contrastText",
+                width: 28,
+                height: 28,
+                "&:hover": { bgcolor: "error.dark" },
+              }}
+              aria-label="移除图片"
             >
-              <X size={12} />
-            </button>
-          </div>
-        </div>
+              <X size={14} />
+            </IconButton>
+          </Box>
+        </Box>
       ) : null}
-      <div className="flex gap-2 items-center">
-        <button
+      <Box sx={{ display: "flex", gap: 1, alignItems: "flex-end" }}>
+        <IconButton
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="p-2.5 text-gray-500 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition-colors"
           disabled={disabled}
+          size="small"
+          sx={{
+            color: "text.secondary",
+            "&:hover": { bgcolor: "action.hover", color: "primary.main" },
+          }}
+          aria-label="上传图片"
         >
           <Image size={20} />
-        </button>
+        </IconButton>
         <input
           type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
           accept="image/*"
-          className="hidden"
+          hidden
           disabled={disabled}
         />
-        <textarea
+        <TextField
+          multiline
+          minRows={1}
+          maxRows={6}
+          fullWidth
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="描述你有的食材..."
-          className="flex-1 bg-gray-100/80 border-0 rounded-2xl px-4 py-2.5 resize-none focus:outline-none focus:ring-2 focus:ring-orange-300 focus:bg-white transition-all"
-          rows={1}
           disabled={disabled}
+          variant="outlined"
+          size="small"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2,
+              bgcolor: "action.hover",
+              "&:hover": { bgcolor: "action.selected" },
+              "&.Mui-focused": { bgcolor: "background.paper" },
+            },
+          }}
         />
-        <button
+        <IconButton
           type="button"
           onClick={handleSend}
           disabled={disabled || (!text.trim() && !file)}
-          className="p-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl hover:from-orange-600 hover:to-red-600 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+          color="primary"
+          sx={{
+            bgcolor: "primary.main",
+            color: "primary.contrastText",
+            borderRadius: 2,
+            "&:hover": { bgcolor: "primary.dark" },
+            "&.Mui-disabled": {
+              bgcolor: "action.disabledBackground",
+              color: "action.disabled",
+            },
+          }}
+          aria-label="发送"
         >
           <Send size={20} />
-        </button>
-      </div>
-    </div>
+        </IconButton>
+      </Box>
+    </Box>
   );
 }

@@ -7,18 +7,17 @@ import Typography from "@mui/material/Typography";
 import { Link } from "react-router-dom";
 import homeFood from "@/assets/home-food.jpg";
 import homeClothing from "@/assets/home-clothing.jpg";
-
-const cardShadow =
-  "0 1px 2px -2px rgba(0,0,0,0.16), 0 3px 6px 0 rgba(0,0,0,0.12), 0 5px 12px 4px rgba(0,0,0,0.09)";
-
-const cardShadowHover =
-  "0 3px 6px -4px rgba(0,0,0,0.18), 0 6px 16px 0 rgba(0,0,0,0.14), 0 9px 28px 8px rgba(0,0,0,0.10)";
+import {
+  homeCardInteractiveSx,
+  pageShellSx,
+} from "@/theme/homeChrome";
 
 export default function HomePage() {
   return (
     <Box
       className="min-h-screen"
       sx={{
+        ...pageShellSx,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -26,7 +25,6 @@ export default function HomePage() {
         gap: 3,
         px: 2,
         py: 4,
-        bgcolor: "background.default",
       }}
     >
       <Card
@@ -34,16 +32,7 @@ export default function HomePage() {
         sx={{
           width: "100%",
           maxWidth: 520,
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "divider",
-          boxShadow: cardShadow,
-          overflow: "hidden",
-          transition: "box-shadow 0.2s ease, transform 0.2s ease",
-          "&:hover": {
-            boxShadow: cardShadowHover,
-            transform: "translateY(-2px)",
-          },
+          ...homeCardInteractiveSx,
         }}
       >
         <CardActionArea component={Link} to="/yum" sx={{ display: "block" }}>
@@ -70,16 +59,7 @@ export default function HomePage() {
         sx={{
           width: "100%",
           maxWidth: 520,
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "divider",
-          boxShadow: cardShadow,
-          overflow: "hidden",
-          transition: "box-shadow 0.2s ease, transform 0.2s ease",
-          "&:hover": {
-            boxShadow: cardShadowHover,
-            transform: "translateY(-2px)",
-          },
+          ...homeCardInteractiveSx,
         }}
       >
         <CardActionArea component={Link} to="/clothing" sx={{ display: "block" }}>

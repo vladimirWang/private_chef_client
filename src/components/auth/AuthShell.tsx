@@ -2,6 +2,7 @@ import * as React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { ChefHat } from "lucide-react";
 import { Box, Typography } from "@mui/material";
+import { HOME_CARD_SHADOW } from "@/theme/homeChrome";
 
 export type AuthShellProps = {
   title: string;
@@ -22,7 +23,7 @@ export default function AuthShell({
         minHeight: "100vh",
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
-        bgcolor: "#f4f4f5",
+        bgcolor: "background.default",
       }}
     >
       <Box
@@ -33,7 +34,7 @@ export default function AuthShell({
           px: 2,
           py: 2,
           background:
-            "linear-gradient(160deg, #1c1917 0%, #292524 45%, #44403c 100%)",
+            "linear-gradient(160deg, #431407 0%, #7c2d12 42%, #b45309 100%)",
           color: "common.white",
         }}
       >
@@ -53,7 +54,7 @@ export default function AuthShell({
           px: { md: 6, lg: 8 },
           py: 8,
           background:
-            "linear-gradient(160deg, #1c1917 0%, #292524 45%, #44403c 100%)",
+            "linear-gradient(160deg, #431407 0%, #7c2d12 42%, #b45309 100%)",
           color: "common.white",
           position: "relative",
           overflow: "hidden",
@@ -141,7 +142,7 @@ export default function AuthShell({
               fontWeight: 700,
               letterSpacing: "-0.02em",
               mb: subtitle ? 1 : 3,
-              color: "#18181b",
+              color: "text.primary",
             }}
           >
             {title}
@@ -158,10 +159,10 @@ export default function AuthShell({
           <Box
             sx={{
               bgcolor: "background.paper",
-              borderRadius: 3,
+              borderRadius: 2,
               border: "1px solid",
               borderColor: "divider",
-              boxShadow: "0 8px 30px rgba(15, 23, 42, 0.06)",
+              boxShadow: HOME_CARD_SHADOW,
               p: { xs: 3, sm: 4 },
             }}
           >

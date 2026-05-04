@@ -2,6 +2,11 @@ import type { Message } from "@/types/chat";
 import { User, Loader2, ChefHat } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Box from "@mui/material/Box";
+import Avatar from "@mui/material/Avatar";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import { HOME_CARD_SHADOW } from "@/theme/homeChrome";
 
 interface ChatMessageProps {
   message: Message;
@@ -11,125 +16,235 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`flex gap-3 max-w-[85%] ${isUser ? "flex-row-reverse" : ""} animate-fade-in`}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: isUser ? "flex-end" : "flex-start",
+      }}
+    >
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1.5,
+          maxWidth: "85%",
+          flexDirection: isUser ? "row-reverse" : "row",
+          alignItems: "flex-start",
+        }}
       >
-        <div
-          className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center shadow-md ${
-            isUser
-              ? "bg-gradient-to-br from-blue-400 to-blue-600"
-              : "bg-gradient-to-br from-orange-400 to-red-500"
-          }`}
+        <Avatar
+          sx={{
+            width: 36,
+            height: 36,
+            flexShrink: 0,
+            bgcolor: isUser ? "primary.dark" : "primary.main",
+            boxShadow: HOME_CARD_SHADOW,
+          }}
         >
           {message.loading || message.streaming ? (
-            <Loader2 size={16} className="text-white animate-spin" />
+            <Loader2 size={16} color="white" className="animate-spin" />
           ) : isUser ? (
-            <User size={16} className="text-white" />
+            <User size={16} color="white" />
           ) : (
-            <ChefHat size={16} className="text-white" />
+            <ChefHat size={16} color="white" />
           )}
-        </div>
+        </Avatar>
 
-        <div
-          className={`rounded-2xl px-4 py-3 shadow-sm ${
-            isUser
-              ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-              : "bg-white/90 text-gray-800 border border-gray-100"
-          }`}
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 2,
+            px: 2,
+            py: 1.5,
+            ...(isUser
+              ? {
+                  bgcolor: "primary.main",
+                  color: "primary.contrastText",
+                }
+              : {
+                  bgcolor: "background.paper",
+                  color: "text.primary",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  boxShadow: HOME_CARD_SHADOW,
+                }),
+          }}
         >
           {message.imageUrl && (
-            <img
+            <Box
+              component="img"
               src={message.imageUrl}
               alt="上传的图片"
-              className="rounded-lg mb-2 max-w-48 object-cover"
+              sx={{
+                borderRadius: 2,
+                mb: 1,
+                maxWidth: 192,
+                objectFit: "cover",
+                display: "block",
+              }}
             />
           )}
           {isUser ? (
-            <p className="whitespace-pre-wrap leading-relaxed">
+            <Typography
+              component="div"
+              variant="body2"
+              sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}
+            >
               {typeof message.content === "string"
                 ? message.content
                 : JSON.stringify(message.content)}
-            </p>
+            </Typography>
           ) : (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
                 h1: ({ children }) => (
-                  <h1 className="text-xl font-bold mb-2 mt-3">{children}</h1>
+                  <Typography component="h1" variant="h6" sx={{ fontWeight: 700, mb: 1, mt: 2 }}>
+                    {children}
+                  </Typography>
                 ),
                 h2: ({ children }) => (
-                  <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>
+                  <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700, mb: 1, mt: 2 }}>
+                    {children}
+                  </Typography>
                 ),
                 h3: ({ children }) => (
-                  <h3 className="text-base font-semibold mb-1 mt-2">{children}</h3>
+                  <Typography component="h3" variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, mt: 1.5 }}>
+                    {children}
+                  </Typography>
                 ),
-                p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                p: ({ children }) => (
+                  <Typography component="p" variant="body2" sx={{ mb: 1, "&:last-child": { mb: 0 } }}>
+                    {children}
+                  </Typography>
+                ),
                 ul: ({ children }) => (
-                  <ul className="list-disc ml-4 mb-2 space-y-1">{children}</ul>
+                  <Box component="ul" sx={{ pl: 2.5, mb: 1, listStyleType: "disc" }}>
+                    {children}
+                  </Box>
                 ),
                 ol: ({ children }) => (
-                  <ol className="list-decimal ml-4 mb-2 space-y-1">{children}</ol>
+                  <Box component="ol" sx={{ pl: 2.5, mb: 1, listStyleType: "decimal" }}>
+                    {children}
+                  </Box>
                 ),
                 li: ({ children }) => (
-                  <li className="mb-1 leading-relaxed">{children}</li>
+                  <Typography component="li" variant="body2" sx={{ mb: 0.5, display: "list-item" }}>
+                    {children}
+                  </Typography>
                 ),
                 a: ({ href, children }) => (
-                  <a
+                  <Typography
+                    component="a"
+                    variant="body2"
                     href={href}
-                    className="text-blue-600 hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
+                    sx={{ color: "primary.main", textDecoration: "underline" }}
                   >
                     {children}
-                  </a>
+                  </Typography>
                 ),
                 strong: ({ children }) => (
-                  <strong className="font-semibold">{children}</strong>
-                ),
-                em: ({ children }) => <em className="italic">{children}</em>,
-                code: ({ children }) => (
-                  <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono">
+                  <Typography component="strong" variant="body2" sx={{ fontWeight: 600 }}>
                     {children}
-                  </code>
+                  </Typography>
+                ),
+                em: ({ children }) => (
+                  <Typography component="em" variant="body2" sx={{ fontStyle: "italic" }}>
+                    {children}
+                  </Typography>
+                ),
+                code: ({ children }) => (
+                  <Box
+                    component="code"
+                    sx={{
+                      bgcolor: "action.hover",
+                      px: 0.75,
+                      py: 0.25,
+                      borderRadius: 1,
+                      fontFamily: "monospace",
+                      fontSize: "0.8125rem",
+                    }}
+                  >
+                    {children}
+                  </Box>
                 ),
                 pre: ({ children }) => (
-                  <pre className="bg-gray-100 p-3 rounded-lg overflow-x-auto mb-2">
+                  <Box
+                    component="pre"
+                    sx={{
+                      bgcolor: "action.hover",
+                      p: 1.5,
+                      borderRadius: 2,
+                      overflow: "auto",
+                      mb: 1,
+                      fontSize: "0.8125rem",
+                    }}
+                  >
                     {children}
-                  </pre>
+                  </Box>
                 ),
                 blockquote: ({ children }) => (
-                  <blockquote className="border-l-4 border-orange-300 pl-3 italic text-gray-600 mb-2">
+                  <Box
+                    component="blockquote"
+                    sx={{
+                      borderLeft: 4,
+                      borderColor: "primary.light",
+                      pl: 1.5,
+                      fontStyle: "italic",
+                      color: "text.secondary",
+                      mb: 1,
+                    }}
+                  >
                     {children}
-                  </blockquote>
+                  </Box>
                 ),
                 table: ({ children }) => (
-                  <table className="w-full border-collapse border border-gray-300 mb-3">
+                  <Box
+                    component="table"
+                    sx={{ width: "100%", borderCollapse: "collapse", mb: 1.5, fontSize: "0.875rem" }}
+                  >
                     {children}
-                  </table>
+                  </Box>
                 ),
                 thead: ({ children }) => (
-                  <thead className="bg-gray-50">{children}</thead>
+                  <Box component="thead" sx={{ bgcolor: "action.hover" }}>
+                    {children}
+                  </Box>
                 ),
-                tbody: ({ children }) => <tbody>{children}</tbody>,
+                tbody: ({ children }) => <Box component="tbody">{children}</Box>,
                 tr: ({ children }) => (
-                  <tr className="border-b border-gray-200">{children}</tr>
+                  <Box component="tr" sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
+                    {children}
+                  </Box>
                 ),
                 th: ({ children }) => (
-                  <th className="border border-gray-300 px-3 py-2 text-left font-semibold bg-gray-50">
+                  <Box
+                    component="th"
+                    sx={{
+                      border: "1px solid",
+                      borderColor: "divider",
+                      px: 1.5,
+                      py: 1,
+                      textAlign: "left",
+                      fontWeight: 600,
+                    }}
+                  >
                     {children}
-                  </th>
+                  </Box>
                 ),
                 td: ({ children }) => (
-                  <td className="border border-gray-300 px-3 py-2">{children}</td>
+                  <Box component="td" sx={{ border: "1px solid", borderColor: "divider", px: 1.5, py: 1 }}>
+                    {children}
+                  </Box>
                 ),
               }}
             >
               {String(message.content || "")}
             </ReactMarkdown>
           )}
-        </div>
-      </div>
-    </div>
+        </Paper>
+      </Box>
+    </Box>
   );
 }
