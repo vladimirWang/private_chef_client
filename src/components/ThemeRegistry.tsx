@@ -3,6 +3,7 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { SnackbarProvider } from "notistack";
 
 const emotionCache = createCache({ key: "mui", prepend: true });
 
@@ -45,7 +46,13 @@ export default function ThemeRegistry({
     <CacheProvider value={emotionCache}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        {children}
+        <SnackbarProvider
+          maxSnack={3}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          autoHideDuration={4000}
+        >
+          {children}
+        </SnackbarProvider>
       </ThemeProvider>
     </CacheProvider>
   );

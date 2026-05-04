@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance, type AxiosResponse, type AxiosRequestConfig } from "axios";
-// import { message } from "antd";
+import { enqueueSnackbar } from "notistack";
 import { sleep } from "../utils/common";
 import { type IResponse } from "../api/commonDef";
 
@@ -34,7 +34,7 @@ export const requestGenerator = (baseUrl: string) => {
 	// 请求拦截器：统一添加 Token
 	axiosInstance.interceptors.request.use(config => {
 		const token = localStorage.getItem("access_token");
-		if (token) config.headers.Authorization = `${token}`;
+		if (token) config.headers.Authorization = `Bearer ${token}`;
 		// if (config.method === "GET" && config.params.includeDeleted === 1) {
 		// 	delete config.params.includeDeleted;
 		// 	config.params.deletedAt = true;
@@ -98,14 +98,18 @@ export const requestGenerator = (baseUrl: string) => {
 				if (status === 401) {
 					localStorage.removeItem("access_token");
 
+					enqueueSnackbar("登录已失效，请重新登录", {
+						variant: "error",
+						preventDuplicate: true,
+					});
+
 					// 获取当前路径，用于登录后回跳
 					const currentPath = window.location.pathname + window.location.search;
 					const redirectUrl = encodeURIComponent(currentPath);
 
 					// 避免在登录页时重复跳转
 					if (currentPath !== "/landing/login" && !currentPath.startsWith("/landing/login")) {
-						// message.error("登录过期，请重新登录");
-						// 使用 setTimeout 延迟跳转，确保消息提示有时间显示
+						// 延迟跳转，便于用户看到 Snackbar 提示
 						await sleep(2000);
 						window.location.href = `/#/landing/login?redirect=${redirectUrl}`;
 					}

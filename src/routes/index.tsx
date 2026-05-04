@@ -26,11 +26,11 @@ export const routes: RouteObject[] = [
         ]
     },
     {
-        path: "/login",
+        path: "/landing/login",
         Component: LoginForm
     },
     {
-        path: "/register",
+        path: "/landing/register",
         Component: RegisterForm
     },
     {

@@ -51,6 +51,7 @@ export default function LoginForm() {
         // remember,
       });
       console.log("result: ", result)
+      localStorage.setItem("access_token", result.token)
       navigate(postLoginPathFromWindow(search.toString()), { replace: true });
       // setFormError(result.error);
     } finally {
