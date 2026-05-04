@@ -8,8 +8,72 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import homeClothing from "@/assets/home-clothing.jpg";
 import { homeCardSurfaceSx, pageShellSx } from "@/theme/homeChrome";
+import Uploader from "@/components/uploader/Uploader";
+import { useState } from "react";
+import { uploadFile } from "@/api/util";
+import { updateKnowledgeBase, consultKnowledgeBase } from "@/api/clothing";
+import { TextField } from "@mui/material";
+import { enqueueSnackbar } from "notistack";
 
 export default function ClothingPage() {
+  const [file, setFile] = useState<null | File>(null);
+  const [filepath, setFilepath] = useState<null | string>(null);
+  const [question, setQuestion] = useState<null | string>("我体重160斤，尺码推荐");
+
+  const [result, setResult] = useState<null | string>(null);
+  const handleUpload = async () => {
+    if (!file) return;
+    try {
+      const uploadResponse = await uploadFile(file);
+      console.log("uploadResponse: ", uploadResponse);
+      const imageUrl = uploadResponse.url;
+      console.log("imageUrl 0: ", imageUrl);
+      setFilepath(imageUrl);
+      enqueueSnackbar("上传成功", {
+        variant: "error",
+        preventDuplicate: true,
+      });
+    } catch (error) {
+      console.error("图片上传失败:", error);
+      return;
+    }
+  };
+
+  const onSubmitKnowledgeBase = async() => {
+    console.log("----onSubmitKnowledgeBase:---- ", filepath)
+    if (!filepath) return;
+    try {
+      const updateResponse = await updateKnowledgeBase({filepath: filepath});
+      console.log("updateResponse: ", updateResponse);
+      // setResult(updateResponse.data);
+      enqueueSnackbar("更新成功", {
+        variant: "error",
+        preventDuplicate: true,
+      });
+    } catch (error) {
+      console.error("上传更新到知识库失败:", error);
+      return;
+    }
+  }
+
+  const [questionLoading, setQuestionLoading] = useState(false);
+
+  const onConsult = async() => {
+    console.log("----onConsult:---- ", question)
+    if (!question) return;
+    setQuestionLoading(true)
+    try {
+      
+      const consultResponse = await consultKnowledgeBase({question: '我体重178斤，尺码推荐'});
+      console.log("consultResponse: ", consultResponse);
+      setResult(consultResponse.data);
+    } catch (error) {
+      console.error("咨询失败:", error);
+    } finally {
+      setQuestionLoading(false)
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -22,38 +86,19 @@ export default function ClothingPage() {
         gap: 2,
       }}
     >
-      <Box sx={{ width: "100%", maxWidth: 520 }}>
-        <Button
-          component={Link}
-          to="/"
-          startIcon={<ArrowLeft size={18} />}
-          color="inherit"
-          sx={{
-            mb: 1,
-            color: "text.secondary",
-            "&:hover": { bgcolor: "action.hover" },
-          }}
-        >
-          返回首页
-        </Button>
-        <Card elevation={0} sx={{ ...homeCardSurfaceSx, width: "100%" }}>
-          <CardMedia
-            component="img"
-            height={220}
-            image={homeClothing}
-            alt="服饰"
-            sx={{ objectFit: "cover" }}
-          />
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h5" component="h1" gutterBottom sx={{ fontWeight: 700 }}>
-              服饰
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              穿搭与形象相关能力将在这里逐步开放，敬请期待。
-            </Typography>
-          </CardContent>
-        </Card>
-      </Box>
+      <Uploader disabled={false} handleFileChange={setFile} accept="text/plain"/>
+      <Button onClick={handleUpload} disabled={!file}>
+        上传文件
+      </Button>
+      <Button onClick={onSubmitKnowledgeBase} disabled={!filepath}>
+        上传更新到知识库
+      </Button>
+
+      <TextField id="outlined-basic" label="Outlined" variant="outlined" value={question} onChange={(e) => setQuestion(e.target.value)}/>
+      <Button onClick={onConsult} disabled={!question} loading={questionLoading}>
+        咨询
+      </Button>
+      <Typography variant="body1">{result}</Typography>
     </Box>
   );
 }

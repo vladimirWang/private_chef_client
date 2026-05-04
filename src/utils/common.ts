@@ -24,3 +24,12 @@ export const generateUUID = (): string => {
     hex.slice(10).join('')
   ].join('-');
 }
+
+export const readAsDataURL = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}

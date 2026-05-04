@@ -1,13 +1,16 @@
-import { useState, useRef, useEffect, type ChangeEvent, type KeyboardEvent } from "react";
+import { useState, useRef, type ChangeEvent, type KeyboardEvent } from "react";
 import { Image, Send, X } from "lucide-react";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
+import { readAsDataURL } from "@/utils/common";
 
 interface ChatInputProps {
   onSend: (text: string, file?: File) => void;
   disabled?: boolean;
 }
+
+
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [text, setText] = useState("");
@@ -43,10 +46,18 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
     }
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
-    if (selectedFile?.type.startsWith("image/")) {
-      setFile(selectedFile);
+    if (!selectedFile) return;
+    console.log("----selectedFile:---- ", selectedFile)
+    setFile(selectedFile);
+
+    if (selectedFile.type.startsWith("image/")) {
+      const base64 = await readAsDataURL(selectedFile);
+      setPreviewUrl(base64);
+      // const imageUrl = URL.createObjectURL(selectedFile);
+      // setPreviewUrl(imageUrl);
+      // URL.revokeObjectURL(imageUrl);
     }
   };
 
@@ -56,17 +67,30 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 1 }}>
           <Box sx={{ position: "relative", display: "inline-block" }}>
             <Box
-              component="img"
-              src={previewUrl}
-              alt="预览"
               sx={{
-                maxWidth: 96,
-                maxHeight: 96,
+                width: 96,
+                height: 96,
+                flexShrink: 0,
                 borderRadius: 2,
-                objectFit: "cover",
-                display: "block",
+                border: "1px solid",
+                borderColor: "divider",
+                overflow: "hidden",
+                boxSizing: "border-box",
               }}
-            />
+            >
+              <Box
+                component="img"
+                src={previewUrl}
+                alt="预览缩略图"
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "block",
+                  objectFit: "cover",
+                  objectPosition: "center",
+                }}
+              />
+            </Box>
             <IconButton
               type="button"
               size="small"

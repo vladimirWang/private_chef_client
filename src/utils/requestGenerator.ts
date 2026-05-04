@@ -164,3 +164,4 @@ export const requestGenerator = (baseUrl: string) => {
 
 
 export const bunApi = requestGenerator("/api");
+export const pyApi = requestGenerator("/py");
