@@ -20,7 +20,7 @@ function postLoginPathFromWindow(search: string): string {
   if (raw.startsWith("/") && !raw.startsWith("//") && !raw.includes("\0")) {
     return raw;
   }
-  return "/chat";
+  return "/";
 }
 
 function RegisteredBanner() {

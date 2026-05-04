@@ -6,7 +6,8 @@ import RegisterForm from "@/pages/RegisterForm";
 // import ChatPage from "@/pages/ChatPage";
 import Layout from "@/Layout";
 import NotFound from "@/pages/NotFound";
-const chatPageLazy = lazy(() => import("@/pages/ChatPage"));
+const yumPageLazy = lazy(() => import("@/pages/YumPage"));
+const clotingPageLazy = lazy(() => import("@/pages/ClothingPage"));
 
 export const routes: RouteObject[] = [
     {
@@ -20,8 +21,12 @@ export const routes: RouteObject[] = [
                 // Component: AssistantPage
             },
             {
-                path: "/chat",
-                Component: chatPageLazy
+                path: "/yum",
+                Component: yumPageLazy
+            },
+            {
+                path: "/clothing",
+                Component: clotingPageLazy
             }
         ]
     },
