@@ -5,7 +5,7 @@ import { ChatInput } from "@/components/ChatInput";
 import { uploadFile } from "../api/util";
 import { clearChatHistory, yumChatStream } from "../api/chat";
 import { generateUUID } from "@/utils/common";
-import { UtensilsCrossed, Plus, Menu, User } from "lucide-react";
+import { UtensilsCrossed, Plus, Menu, User, Bold } from "lucide-react";
 import Drawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
@@ -182,7 +182,7 @@ export default function YumPage() {
     const oldMessageLength = messages.length;
     try {
       await consultKnowledgeBaseStream(
-        { question: q },
+        { question: q, signal },
         (chunk) => {
           if (oldMessageLength === messages.length) {
             addMessage({
@@ -206,7 +206,6 @@ export default function YumPage() {
             );
           }
         },
-        { signal },
       );
       console.log("complete");
     } catch (error) {
@@ -363,7 +362,8 @@ export default function YumPage() {
           </CardContent>
         </Card>
       </Box> */}
-      <section style={{background: 'white', padding: 10}}>
+      {
+        messages.length> 0 ? <section style={{background: 'white', padding: 10}}>
         {
           messages.map((message, idx) => {
             return (
@@ -406,7 +406,11 @@ export default function YumPage() {
             )
           })
         }
-      </section>
+      </section>: null
+      }
+      {
+        questionLoading? <article style={{fontSize: 18, color: 'gray', fontWeight: 'bold', padding: 5,paddingLeft: 20}}>loading...</article> : null
+      }
       <div style={{background: 'white', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10, display: 'flex', gap: 10, position: 'fixed', bottom: 10, left: 0, right: 0, width: '100%'}}>
         <Input style={{flex: 1}} value={question} onChange={(value) => {
           // console.log("e", e.currentTarget)

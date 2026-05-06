@@ -71,11 +71,16 @@ function decodeConsultSse(buffer: string): {
 }
 
 export const consultKnowledgeBaseStream = (
-  data: { question: string },
+  data: { question: string; signal?: AbortSignal },
   onChunk: (chunk: string) => void,
-  options?: Pick<ConsultStreamOptions, "signal">,
 ) => {
-  return streamChatNew("/py/api/v1/clothing/consult", data, onChunk, options);
+  const { signal, question } = data;
+  return streamChatNew(
+    "/py/api/v1/clothing/consult",
+    { question },
+    onChunk,
+    signal ? { signal } : undefined,
+  );
 };
 
 /**
