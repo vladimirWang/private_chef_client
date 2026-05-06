@@ -423,7 +423,7 @@ export default function YumPage() {
               <rect x="3" y="3" width="18" height="18" fill="black" stroke="currentColor" strokeWidth="2" />
             </svg>
           </Button> :
-          <Button loading={questionLoading} onClick={onConsult}>
+          <Button loading={questionLoading} onClick={onConsult} color="primary" disabled={question?.trim() === ''}>
           咨询
           </Button>
           }
