@@ -138,6 +138,10 @@ export const clearChatHistory = (threadId: string) => {
   });
 };
 
-export const yumChatStream = (data: { message: string, image_url?: string, thread_id: string }, onChunk: (chunk: string) => void) => {
-  return streamChatNew('/py/api/v1/chat/stream', data, onChunk);
-}
+export const yumChatStream = (
+  data: { message: string; image_url?: string; thread_id: string },
+  onChunk: (chunk: string) => void,
+  options?: { signal?: AbortSignal },
+) => {
+  return streamChatNew("/py/api/v1/chat/stream", data, onChunk, options);
+};

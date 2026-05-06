@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type ChangeEvent } from "react";
+import { useState, useEffect, useRef, useCallback, type ChangeEvent } from "react";
 import type { Message } from "@/types/chat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
@@ -49,6 +49,7 @@ export default function YumPage() {
   });
 
   const [questionLoading, setQuestionLoading] = useState(false);
+  const consultStreamAbortRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageIdCounter = useRef(0);
   const [question, setQuestion] = useState<undefined | string>("我体重160斤，尺码推荐");
@@ -156,39 +157,68 @@ export default function YumPage() {
     }
   };
 
+  const stopConsultStream = useCallback(() => {
+    consultStreamAbortRef.current?.abort();
+    setQuestionLoading(false);
+  }, []);
+
   const onConsult = async () => {
+    const trimmed = question?.trim();
+    if (!trimmed) return;
+
+    consultStreamAbortRef.current?.abort();
+    consultStreamAbortRef.current = new AbortController();
+    const controller = consultStreamAbortRef.current;
+    const { signal } = controller;
+
     setQuestionLoading(true);
-    // setResult("");
-    if (!question) return;
-    setQuestion("")
-    const q = question.trim();
+    setQuestion("");
+    const q = trimmed;
     addMessage({
-      role: 'user',
+      role: "user",
       content: q,
-    })
-    console.log("start")
-    const oldMessageLength = messages.length
+    });
+    console.log("start");
+    const oldMessageLength = messages.length;
     try {
-      await consultKnowledgeBaseStream({ question: q }, (chunk) => {
-        // setResult((prev) => (prev ?? "") + chunk);
-        if (oldMessageLength === messages.length) {
-          addMessage({
-            role: 'assistant',
-            content: chunk,
-          })
-        } else {
-          setMessages(messages => {
-            return messages.map((item, idx) => {
-              return idx !== messages.length -1? item: {id: `msg_${messageIdCounter.current}_${Date.now()}`, timestamp: Date.now(), role: 'assistant', content: item.content+chunk}
-            })
-          })
-        }
-      });
-      console.log("complete")
-      
+      await consultKnowledgeBaseStream(
+        { question: q },
+        (chunk) => {
+          if (oldMessageLength === messages.length) {
+            addMessage({
+              role: "assistant",
+              content: chunk,
+            });
+          } else {
+            setMessages((messages) =>
+              messages.map((item, idx) =>
+                idx !== messages.length - 1 ? (
+                  item
+                ) : (
+                  {
+                    id: `msg_${messageIdCounter.current}_${Date.now()}`,
+                    timestamp: Date.now(),
+                    role: "assistant",
+                    content: item.content + chunk,
+                  }
+                ),
+              ),
+            );
+          }
+        },
+        { signal },
+      );
+      console.log("complete");
     } catch (error) {
-      console.error("咨询失败:", error);
+      const aborted =
+        error instanceof DOMException && error.name === "AbortError";
+      if (!aborted) {
+        console.error("咨询失败:", error);
+      }
     } finally {
+      if (consultStreamAbortRef.current === controller) {
+        consultStreamAbortRef.current = null;
+      }
       setQuestionLoading(false);
     }
   };
@@ -384,7 +414,7 @@ export default function YumPage() {
         }}/>
         {
           questionLoading ? 
-          <Button onClick={() => {console.log("stop")}}>
+          <Button aria-label="停止生成" onClick={stopConsultStream}>
             <svg viewBox="0 0 24 24" width="24" height="24">
               <rect x="3" y="3" width="18" height="18" fill="black" stroke="currentColor" strokeWidth="2" />
             </svg>

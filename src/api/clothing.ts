@@ -70,9 +70,13 @@ function decodeConsultSse(buffer: string): {
   return { chunks, rest, done };
 }
 
-export const consultKnowledgeBaseStream = (data: { question: string }, onChunk: (chunk: string) => void) => {
-  return streamChatNew('/py/api/v1/clothing/consult', data, onChunk)
-}
+export const consultKnowledgeBaseStream = (
+  data: { question: string },
+  onChunk: (chunk: string) => void,
+  options?: Pick<ConsultStreamOptions, "signal">,
+) => {
+  return streamChatNew("/py/api/v1/clothing/consult", data, onChunk, options);
+};
 
 /**
  * /consult 为 text/event-stream（SSE）。
