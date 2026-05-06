@@ -167,14 +167,22 @@ export default function YumPage() {
       content: q,
     })
     console.log("start")
+    const oldMessageLength = messages.length
     try {
       await consultKnowledgeBaseStream({ question: q }, (chunk) => {
         // setResult((prev) => (prev ?? "") + chunk);
-        setMessages(messages => {
-          return messages.map((item, idx) => {
-            return idx !== messages.length -1? item: {id: `msg_${messageIdCounter.current}_${Date.now()}`, timestamp: Date.now(), role: 'assistant', content: item.content+chunk}
+        if (oldMessageLength === messages.length) {
+          addMessage({
+            role: 'assistant',
+            content: chunk,
           })
-        })
+        } else {
+          setMessages(messages => {
+            return messages.map((item, idx) => {
+              return idx !== messages.length -1? item: {id: `msg_${messageIdCounter.current}_${Date.now()}`, timestamp: Date.now(), role: 'assistant', content: item.content+chunk}
+            })
+          })
+        }
       });
       console.log("complete")
       
@@ -329,19 +337,41 @@ export default function YumPage() {
         {
           messages.map((message, idx) => {
             return (
-              <div key={idx}>
+              <div key={idx} style={{marginBottom: 20}}>
                 {
                   message.role === 'assistant' ?
-                  <div style={{width: '100%', display: "flex", justifyContent: 'start'}}>
-                    <Image width={60} src={robotPng}/>
-                  </div>:
-                  <div style={{width: '100%', display: "flex", justifyContent: 'end'}}>
-                    <Image width={60} src={userPng}/>
+                  <>
+                    <div style={{width: '100%', display: "flex", justifyContent: 'start'}}>
+                      <Image width={60} src={robotPng}/>
+                    </div>
+                    <article>
+                      <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", alignSelf: "stretch", maxWidth: "min(720px, 100%)" }}>
+                        {message.content}
+                      </Typography>
+                    </article>
+                  </>
+                  :
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                      gap: 4,
+                    }}
+                  >
+                    <Image width={60} src={userPng} />
+                    <article style={{ maxWidth: "min(720px, 100%)" }}>
+                      <Typography
+                        variant="body1"
+                        sx={{ whiteSpace: "pre-wrap", textAlign: "right" }}
+                      >
+                        {message.content}
+                      </Typography>
+                    </article>
                   </div>
                 }
-                  <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", alignSelf: "stretch", maxWidth: "min(720px, 100%)" }}>
-                  {message.content}
-              </Typography>
+
               </div>
             )
           })
