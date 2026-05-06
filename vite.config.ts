@@ -25,8 +25,10 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/py': {
-        target: 'http://localhost:8001',
+        target: 'http://127.0.0.1:8001',
         changeOrigin: true,
+        timeout: 600_000,
+        proxyTimeout: 600_000,
         rewrite: (path) => path.replace(/^\/py/, ''),
       },
     },

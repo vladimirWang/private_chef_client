@@ -1,3 +1,4 @@
+import { streamChatNew } from "@/utils/streamChatNew";
 import { bunApi } from "../utils/requestGenerator";
 
 type StreamChatParams = {
@@ -61,73 +62,73 @@ function decodeSseOrRawText(buffer: string): { chunks: string[]; rest: string; d
   return { chunks: out, rest, done };
 }
 
-export async function streamChatNew(
-  params: StreamChatParams,
-  handlers: StreamChatHandlers
-): Promise<void> {
-  const url = `${gatewayApiBase}/chat/stream`;
-  const { onChunk, onError, onDone } = handlers;
+// export async function streamChatNew(
+//   params: StreamChatParams,
+//   handlers: StreamChatHandlers
+// ): Promise<void> {
+//   const url = `${gatewayApiBase}/chat/stream`;
+//   const { onChunk, onError, onDone } = handlers;
 
-  try {
-    // Bun /chat/stream 当前只接收 JSON（与 proto 字段一致：image_url/thread_id）
-    // 如需本地文件上传，请先走 OSS 上传拿到 imageUrl 再传给后端。
-    if (params.imageFile && !params.imageUrl) {
-      throw new Error("当前不支持直接上传本地图片；请先上传获得 imageUrl 后再发起对话。");
-    }
+//   try {
+//     // Bun /chat/stream 当前只接收 JSON（与 proto 字段一致：image_url/thread_id）
+//     // 如需本地文件上传，请先走 OSS 上传拿到 imageUrl 再传给后端。
+//     if (params.imageFile && !params.imageUrl) {
+//       throw new Error("当前不支持直接上传本地图片；请先上传获得 imageUrl 后再发起对话。");
+//     }
 
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
-    };
-    const body = JSON.stringify({
-      message: params.message,
-      thread_id: params.threadId,
-      image_url: params.imageUrl ?? "",
-    });
+//     const headers: Record<string, string> = {
+//       "Content-Type": "application/json",
+//     };
+//     const body = JSON.stringify({
+//       message: params.message,
+//       thread_id: params.threadId,
+//       image_url: params.imageUrl ?? "",
+//     });
 
-    const resp = await fetch(url, {
-      method: "POST",
-      headers,
-      body,
-      signal: params.signal,
-      credentials: "include",
-    });
+//     const resp = await fetch(url, {
+//       method: "POST",
+//       headers,
+//       body,
+//       signal: params.signal,
+//       credentials: "include",
+//     });
 
-    if (!resp.ok) {
-      const text = await resp.text().catch(() => "");
-      throw new Error(`streamChat 请求失败：${resp.status} ${resp.statusText}${text ? ` - ${text}` : ""}`);
-    }
+//     if (!resp.ok) {
+//       const text = await resp.text().catch(() => "");
+//       throw new Error(`streamChat 请求失败：${resp.status} ${resp.statusText}${text ? ` - ${text}` : ""}`);
+//     }
 
-    if (!resp.body) {
-      throw new Error("streamChat 响应不支持流式读取（resp.body 为空）");
-    }
+//     if (!resp.body) {
+//       throw new Error("streamChat 响应不支持流式读取（resp.body 为空）");
+//     }
 
-    const reader = resp.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-    let buffer = "";
+//     const reader = resp.body.getReader();
+//     const decoder = new TextDecoder("utf-8");
+//     let buffer = "";
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
+//     while (true) {
+//       const { done, value } = await reader.read();
+//       if (done) break;
+//       buffer += decoder.decode(value, { stream: true });
 
-      const { chunks, rest, done: sseDone } = decodeSseOrRawText(buffer);
-      buffer = rest;
-      for (const c of chunks) {
-        if (c) onChunk(c);
-      }
-      if (sseDone) break;
-    }
+//       const { chunks, rest, done: sseDone } = decodeSseOrRawText(buffer);
+//       buffer = rest;
+//       for (const c of chunks) {
+//         if (c) onChunk(c);
+//       }
+//       if (sseDone) break;
+//     }
 
-    // 如果最后残留一些非 SSE 文本，直接输出
-    if (buffer.trim()) onChunk(buffer);
+//     // 如果最后残留一些非 SSE 文本，直接输出
+//     if (buffer.trim()) onChunk(buffer);
 
-    onDone?.();
-  } catch (e: any) {
-    const err = e instanceof Error ? e : new Error(String(e));
-    onError?.(err);
-    if (!onError) throw err;
-  }
-}
+//     onDone?.();
+//   } catch (e: any) {
+//     const err = e instanceof Error ? e : new Error(String(e));
+//     onError?.(err);
+//     if (!onError) throw err;
+//   }
+// }
 
 export const clearChatHistory = (threadId: string) => {
   return bunApi.delete("/chat/messages", {
@@ -136,3 +137,7 @@ export const clearChatHistory = (threadId: string) => {
     },
   });
 };
+
+export const yumChatStream = (data: { message: string, image_url?: string, thread_id: string }, onChunk: (chunk: string) => void) => {
+  return streamChatNew('/py/api/v1/chat/stream', data, onChunk);
+}

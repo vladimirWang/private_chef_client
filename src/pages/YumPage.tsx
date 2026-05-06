@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ChangeEvent } from "react";
 import type { Message } from "@/types/chat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { uploadFile } from "../api/util";
-import { clearChatHistory } from "../api/chat";
+import { clearChatHistory, yumChatStream } from "../api/chat";
 import { generateUUID } from "@/utils/common";
 import { UtensilsCrossed, Plus, Menu, User } from "lucide-react";
 import Drawer from "@mui/material/Drawer";
@@ -15,17 +15,28 @@ import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
+// import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import IconButton from "@mui/material/IconButton";
 import { streamChat } from "@/utils/streamChat";
+import { streamChatNew } from "@/utils/streamChatNew";
 import { homeCardSurfaceSx, pageShellSx } from "@/theme/homeChrome";
+import { consultKnowledgeBaseStream, updateKnowledgeBase } from "@/api/clothing";
+import TextField from "@mui/material/TextField";
+import {Input, Button, Image} from 'antd-mobile'
+import {SearchOutline} from 'antd-mobile-icons'
+
+const robotPng = new URL('../assets/robot.gif', import.meta.url).href
+const userPng = new URL('../assets/user.webp', import.meta.url).href
+console.log("---robotPng---", robotPng)
 
 const CONTENT_MAX_PX = 896;
 
 export default function YumPage() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    // {"role": "assistant", "content": "robot 是英语名词，核心释义包含三类：1.由计算机控制的自动化机械设备（如工业机器人、手术机器人），2.形容机械般缺乏情感的人（含贬义），3.在南非英语中专指交通信号灯 [2] [4-5]。该词源自捷克语“robota”（意为“苦役”）或“robotnik”（意为“农奴”），由捷克作家卡雷尔·恰佩克于1921年在其剧作《罗素姆万能机器人》中引入英语并流行开来 [12-15]。该词英美发音存在差异，英国音标为/ˈrəʊ.bɒt/，美国音标为/ˈroʊ.bɑːt/，分解发音包含/r/、/əʊ/或/oʊ/等音素组合 [1] [4]。其复数形式为robots，派生词包含robotic（形容词）和robotics（机器人技术） [3] [6]。在应用场景中，既涵盖汽车制造、医疗手术等工业领域，也延伸至科幻文学与人工智能伦理探讨 [3] [5]。其发展历程中的重要节点包括1939年世博会首次展出机器人Elektro，1973年诞生首台真人大小的拟人机器人WABOT-1，以及阿西莫夫提出机器人三定律、图灵提出图灵测试等 [14]。2025年前后，人形机器人领域受到关注，中国是相关市场的主要参与者之一；《人形机器人"}
+  ]);
   const [processing, setProcessing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [threadId, setThreadId] = useState<string>(() => {
@@ -36,8 +47,13 @@ export default function YumPage() {
     }
     return storedThreadId;
   });
+
+  const [questionLoading, setQuestionLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageIdCounter = useRef(0);
+  const [question, setQuestion] = useState<undefined | string>("我体重160斤，尺码推荐");
+
+  const [result, setResult] = useState<null | string>(null);
 
   const handleNewChat = async () => {
     setMenuOpen(false);
@@ -73,7 +89,12 @@ export default function YumPage() {
     setMessages((prev) => [...prev, newMessage]);
     return newMessage;
   };
-
+  const handleSend2 = async () => {
+    const imageUrl = "https://private-chef-0424.oss-cn-beijing.aliyuncs.com/1777537901884-ca421154-fridge_food.png";
+    await yumChatStream({ message: "这是我冰箱里的食物，帮我看看能做什么佳肴？", image_url: imageUrl, thread_id: threadId }, (chunk) => {
+      console.log("chunk", chunk);
+    });
+  }
   const handleSend = async (text: string, file?: File) => {
     if (processing) return;
 
@@ -112,55 +133,60 @@ export default function YumPage() {
     }).id;
 
     try {
-      await streamChat(
-        text || "这是我冰箱里的食物，帮我看看能做什么佳肴？",
-        (chunk) => {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantMessageId
-                ? { ...msg, content: msg.content + chunk }
-                : msg
-            )
-          );
-        },
-        imageUrl,
-        (error) => {
-          console.error("聊天失败:", error);
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantMessageId
-                ? {
-                    ...msg,
-                    content: msg.content + `\n[错误]: ${error.message}`,
-                    streaming: false,
-                  }
-                : msg
-            )
-          );
-        },
-        () => {
-          setMessages((prev) =>
-            prev.map((msg) =>
-              msg.id === assistantMessageId ? { ...msg, streaming: false } : msg
-            )
-          );
-        },
-        threadId
-      );
+      await yumChatStream({ message: text || "这是我冰箱里的食物，帮我看看能做什么佳肴？", image_url:imageUrl, thread_id: threadId }, (chunk) => {
+        console.log("chunk", chunk);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, content: msg.content + chunk }
+              : msg
+          )
+        );
+      });
+      console.log("yumChatStream done");
+    } catch (error) {
+      console.error("聊天失败:", error);
+      // setMessages((prev) =>
+      //   prev.map((msg) =>
+      //     msg.id === assistantMessageId ? { ...msg, streaming: false } : msg
+      //   )
+      // );
     } finally {
       setProcessing(false);
     }
   };
 
+  const onConsult = async () => {
+    setQuestionLoading(true);
+    // setResult("");
+    if (!question) return;
+    setQuestion("")
+    const q = question.trim();
+    addMessage({
+      role: 'user',
+      content: q,
+    })
+    console.log("start")
+    try {
+      await consultKnowledgeBaseStream({ question: q }, (chunk) => {
+        // setResult((prev) => (prev ?? "") + chunk);
+        setMessages(messages => {
+          return messages.map((item, idx) => {
+            return idx !== messages.length -1? item: {id: `msg_${messageIdCounter.current}_${Date.now()}`, timestamp: Date.now(), role: 'assistant', content: item.content+chunk}
+          })
+        })
+      });
+      console.log("complete")
+      
+    } catch (error) {
+      console.error("咨询失败:", error);
+    } finally {
+      setQuestionLoading(false);
+    }
+  };
+
   return (
-    <Box
-      sx={{
-        ...pageShellSx,
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-      }}
-    >
+    <div style={{background: '#e9e9e9', height: '100vh'}}> 
       <Drawer
         anchor="left"
         open={menuOpen}
@@ -236,21 +262,11 @@ export default function YumPage() {
               <User size={22} strokeWidth={1.75} />
             </Avatar>
             <Button
-              type="button"
-              variant="outlined"
-              color="inherit"
-              fullWidth
-              size="medium"
+              fill="solid"
+              size="mini"
+              color="primary"
               onClick={() => {
                 void handleLogout();
-              }}
-              sx={{
-                borderColor: "divider",
-                color: "text.primary",
-                "&:hover": {
-                  borderColor: "text.secondary",
-                  bgcolor: "action.hover",
-                },
               }}
             >
               退出登录
@@ -259,7 +275,7 @@ export default function YumPage() {
         </Box>
       </Drawer>
 
-      <Box
+      {/* <Box
         sx={{
           pt: 2,
           px: 2,
@@ -308,115 +324,46 @@ export default function YumPage() {
             </Button>
           </CardContent>
         </Card>
-      </Box>
-
-      <Box
-        sx={{
-          flex: 1,
-          maxWidth: CONTENT_MAX_PX,
-          mx: "auto",
-          width: "100%",
-          px: 2,
-          pt: 2,
-          pb: 24,
-          minHeight: 0,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Card
-          elevation={0}
-          sx={{
-            ...homeCardSurfaceSx,
-            flex: 1,
-            minHeight: { xs: "50vh", sm: 420 },
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <CardContent
-            sx={{
-              flex: 1,
-              overflow: "auto",
-              p: 2,
-              display: "flex",
-              flexDirection: "column",
-              "&:last-child": { pb: 2 },
-            }}
-          >
-            {messages.length === 0 ? (
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  py: 4,
-                  color: "text.secondary",
-                }}
-              >
-                <Box
-                  sx={{
-                    p: 2,
-                    borderRadius: "50%",
-                    bgcolor: "background.default",
-                    mb: 2,
-                    display: "flex",
-                  }}
-                >
-                  <UtensilsCrossed
-                    size={48}
-                    strokeWidth={1.5}
-                    color="currentColor"
-                    style={{ color: "var(--mui-palette-primary-main)" }}
-                  />
-                </Box>
-                <Typography
-                  variant="h6"
-                  sx={{ color: "text.primary", fontWeight: 600 }}
-                >
-                  上传食材图片开始吧
-                </Typography>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  我会帮您识别食材并推荐食谱
-                </Typography>
-              </Box>
-            ) : (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {messages.map((message) => (
-                  <ChatMessage key={message.id} message={message} />
-                ))}
-                <div ref={messagesEndRef} />
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      </Box>
-
-      <Box
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          p: 2,
-          zIndex: 50,
-          pointerEvents: "none",
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: CONTENT_MAX_PX,
-            mx: "auto",
-            pointerEvents: "auto",
-          }}
-        >
-          <Card elevation={0} sx={{ ...homeCardSurfaceSx }}>
-            <ChatInput onSend={handleSend} disabled={processing} />
-          </Card>
-        </Box>
-      </Box>
-    </Box>
+      </Box> */}
+      <section style={{background: 'white', padding: 10}}>
+        {
+          messages.map((message, idx) => {
+            return (
+              <div key={idx}>
+                {
+                  message.role === 'assistant' ?
+                  <div style={{width: '100%', display: "flex", justifyContent: 'start'}}>
+                    <Image width={60} src={robotPng}/>
+                  </div>:
+                  <div style={{width: '100%', display: "flex", justifyContent: 'end'}}>
+                    <Image width={60} src={userPng}/>
+                  </div>
+                }
+                  <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", alignSelf: "stretch", maxWidth: "min(720px, 100%)" }}>
+                  {message.content}
+              </Typography>
+              </div>
+            )
+          })
+        }
+      </section>
+      <div style={{background: 'white', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10, display: 'flex', gap: 10, position: 'fixed', bottom: 10, left: 0, right: 0, width: '100%'}}>
+        <Input style={{flex: 1}} value={question} onChange={(value) => {
+          // console.log("e", e.currentTarget)
+          setQuestion(value)
+        }}/>
+        {
+          questionLoading ? 
+          <Button onClick={() => {console.log("stop")}}>
+            <svg viewBox="0 0 24 24" width="24" height="24">
+              <rect x="3" y="3" width="18" height="18" fill="black" stroke="currentColor" strokeWidth="2" />
+            </svg>
+          </Button> :
+          <Button loading={questionLoading} onClick={onConsult}>
+          咨询
+          </Button>
+          }
+          </div>
+    </div>
   );
 }

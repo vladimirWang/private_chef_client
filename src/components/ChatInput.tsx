@@ -13,7 +13,7 @@ interface ChatInputProps {
 
 
 export function ChatInput({ onSend, disabled }: ChatInputProps) {
-  const [text, setText] = useState("");
+  const [text, setText] = useState("这些食材能做些什么菜");
   const [file, setFile] = useState<File | undefined>();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

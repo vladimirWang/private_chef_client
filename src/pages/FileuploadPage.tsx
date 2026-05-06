@@ -11,16 +11,16 @@ import { homeCardSurfaceSx, pageShellSx } from "@/theme/homeChrome";
 import Uploader from "@/components/uploader/Uploader";
 import { useState } from "react";
 import { uploadFile } from "@/api/util";
-import { updateKnowledgeBase, consultKnowledgeBase } from "@/api/clothing";
+import { consultKnowledgeBaseStream, updateKnowledgeBase } from "@/api/clothing";
 import { TextField } from "@mui/material";
 import { enqueueSnackbar } from "notistack";
+import {Form} from 'antd-mobile'
 
-export default function ClothingPage() {
+const {Item, useForm} = Form
+
+export default function FileuploadPage() {
   const [file, setFile] = useState<null | File>(null);
   const [filepath, setFilepath] = useState<null | string>(null);
-  const [question, setQuestion] = useState<null | string>("我体重160斤，尺码推荐");
-
-  const [result, setResult] = useState<null | string>(null);
   const handleUpload = async () => {
     if (!file) return;
     try {
@@ -56,23 +56,6 @@ export default function ClothingPage() {
     }
   }
 
-  const [questionLoading, setQuestionLoading] = useState(false);
-
-  const onConsult = async() => {
-    console.log("----onConsult:---- ", question)
-    if (!question) return;
-    setQuestionLoading(true)
-    try {
-      
-      const consultResponse = await consultKnowledgeBase({question: '我体重178斤，尺码推荐'});
-      console.log("consultResponse: ", consultResponse);
-      setResult(consultResponse.data);
-    } catch (error) {
-      console.error("咨询失败:", error);
-    } finally {
-      setQuestionLoading(false)
-    }
-  };
 
   return (
     <Box
@@ -93,12 +76,6 @@ export default function ClothingPage() {
       <Button onClick={onSubmitKnowledgeBase} disabled={!filepath}>
         上传更新到知识库
       </Button>
-
-      <TextField id="outlined-basic" label="Outlined" variant="outlined" value={question} onChange={(e) => setQuestion(e.target.value)}/>
-      <Button onClick={onConsult} disabled={!question} loading={questionLoading}>
-        咨询
-      </Button>
-      <Typography variant="body1">{result}</Typography>
     </Box>
   );
 }

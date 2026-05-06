@@ -62,20 +62,20 @@ export default function HomePage() {
           ...homeCardInteractiveSx,
         }}
       >
-        <CardActionArea component={Link} to="/clothing" sx={{ display: "block" }}>
+        <CardActionArea component={Link} to="/fileupload" sx={{ display: "block" }}>
           <CardMedia
             component="img"
             height={200}
             image={homeClothing}
-            alt="服饰"
+            alt="资料上传"
             sx={{ objectFit: "cover" }}
           />
           <CardContent sx={{ p: 3 }}>
             <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
-              服饰
+              资料上传
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              穿搭与服饰相关入口
+              资料上传入口
             </Typography>
           </CardContent>
         </CardActionArea>

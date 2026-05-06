@@ -8,6 +8,9 @@ export async function streamChat(
     onComplete?: () => void,
     threadId?: string
 ): Promise<void> {
+    const d = {message, image_url, threadId}
+    // {"message":"这是我冰箱里的食物，帮我看看能做什么佳肴？","image_url":"http://localhost:3000/static/uploaded/1777945328752-f51813ac-__.jpeg","threadId":"c663ddff-e7b1-412f-9f9c-2e343b41fdea"}
+    console.log("streamChat", JSON.stringify(d));
     try {
         // const url = new URL(`/py/api/v1/chat/stream`);
         const url2 = `/py/api/v1/chat/stream`
@@ -21,6 +24,7 @@ export async function streamChat(
             }),
             headers: {
                 "Content-Type": "application/json",
+                'Accept': 'text/event-stream',
             },
         });
 

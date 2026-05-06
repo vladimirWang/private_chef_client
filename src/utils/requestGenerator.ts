@@ -2,6 +2,7 @@ import axios, { type AxiosInstance, type AxiosResponse, type AxiosRequestConfig 
 import { enqueueSnackbar } from "notistack";
 import { sleep } from "../utils/common";
 import { type IResponse } from "../api/commonDef";
+import { pyApiBaseURL } from "./pyApiPrefix";
 
 // 扩展 AxiosRequestConfig，添加自定义配置字段
 declare module "axios" {
@@ -164,4 +165,4 @@ export const requestGenerator = (baseUrl: string) => {
 
 
 export const bunApi = requestGenerator("/api");
-export const pyApi = requestGenerator("/py");
+export const pyApi = requestGenerator(pyApiBaseURL());

@@ -7,7 +7,7 @@ import RegisterForm from "@/pages/RegisterForm";
 import Layout from "@/Layout";
 import NotFound from "@/pages/NotFound";
 const yumPageLazy = lazy(() => import("@/pages/YumPage"));
-const clotingPageLazy = lazy(() => import("@/pages/ClothingPage"));
+const fileuploadPageLazy = lazy(() => import("@/pages/FileuploadPage"));
 
 export const routes: RouteObject[] = [
     {
@@ -25,8 +25,8 @@ export const routes: RouteObject[] = [
                 Component: yumPageLazy
             },
             {
-                path: "/clothing",
-                Component: clotingPageLazy
+                path: "/fileupload",
+                Component: fileuploadPageLazy
             }
         ]
     },
