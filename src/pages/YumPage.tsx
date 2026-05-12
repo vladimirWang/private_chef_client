@@ -22,7 +22,7 @@ import IconButton from "@mui/material/IconButton";
 import { streamChat } from "@/utils/streamChat";
 import { streamChatNew } from "@/utils/streamChatNew";
 import { homeCardSurfaceSx, pageShellSx } from "@/theme/homeChrome";
-import { consultKnowledgeBaseStream, updateKnowledgeBase } from "@/api/clothing";
+import { consultKnowledgeBaseStream, updateKnowledgeBase, chatConsultStream } from "@/api/clothing";
 import TextField from "@mui/material/TextField";
 import {Input, Button, Image} from 'antd-mobile'
 import {SearchOutline} from 'antd-mobile-icons'
@@ -179,33 +179,25 @@ export default function YumPage() {
       content: q,
     });
     console.log("start");
-    const oldMessageLength = messages.length;
+    const assistantMessageId = addMessage({
+      role: "assistant",
+      content: "",
+      streaming: true,
+    }).id;
     try {
-      await consultKnowledgeBaseStream(
-        { question: q, signal },
-        (chunk) => {
-          if (oldMessageLength === messages.length) {
-            addMessage({
-              role: "assistant",
-              content: chunk,
-            });
-          } else {
-            setMessages((messages) =>
-              messages.map((item, idx) =>
-                idx !== messages.length - 1 ? (
-                  item
-                ) : (
-                  {
-                    id: `msg_${messageIdCounter.current}_${Date.now()}`,
-                    timestamp: Date.now(),
-                    role: "assistant",
-                    content: item.content + chunk,
-                  }
-                ),
-              ),
-            );
-          }
-        },
+      await chatConsultStream({ question: q, signal }, (chunk) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? { ...msg, content: msg.content + chunk }
+              : msg
+          )
+        );
+      });
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId ? { ...msg, streaming: false } : msg
+        )
       );
       console.log("complete");
     } catch (error) {

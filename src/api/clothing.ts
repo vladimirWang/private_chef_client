@@ -1,4 +1,4 @@
-import { pyApi } from "../utils/requestGenerator";
+import { bunApi, pyApi } from "../utils/requestGenerator";
 import { pyRequestUrl } from "../utils/pyApiPrefix";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { streamChatNew } from "@/utils/streamChatNew";
@@ -82,6 +82,19 @@ export const consultKnowledgeBaseStream = (
     signal ? { signal } : undefined,
   );
 };
+
+/** Bun /chat/consult：gRPC 流式透传为 SSE，与 clothing consult 帧格式一致 */
+export async function chatConsultStream(
+  data: { question: string; signal?: AbortSignal },
+  onChunk: (chunk: string) => void,
+): Promise<void> {
+  return streamChatNew(
+    "/api/chat/consult",
+    { question: data.question },
+    onChunk,
+    data.signal ? { signal: data.signal } : undefined,
+  );
+}
 
 /**
  * /consult 为 text/event-stream（SSE）。
