@@ -55,7 +55,7 @@ export default function RegisterForm() {
     <AuthShell
       title="创建账号"
       subtitle="填写基本信息，即可开始使用私厨预约与菜单服务。"
-      altCta={{ preface: "已有账号？", label: "去登录", href: "/login" }}
+      altCta={{ preface: "已有账号？", label: "去登录", href: "/landing/login" }}
     >
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <Stack spacing={2.5}>
