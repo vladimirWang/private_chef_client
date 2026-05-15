@@ -63,7 +63,7 @@ export default function LoginForm() {
     <AuthShell
       title="欢迎回来"
       subtitle="登录后可同步偏好、管理预约与家宴计划。"
-      altCta={{ preface: "还没有账号？", label: "立即注册", href: "/register" }}
+      altCta={{ preface: "还没有账号？", label: "立即注册", href: "/landing/register" }}
     >
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <Stack spacing={2.5}>
