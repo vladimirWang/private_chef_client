@@ -3,7 +3,7 @@ import { pyRequestUrl } from "../utils/pyApiPrefix";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { streamChatNew } from "@/utils/streamChatNew";
 export const updateKnowledgeBase = async (data: { filepath: string }) => {
-  const response = await pyApi.post("/api/v1/clothing/upload", data);
+  const response = await bunApi.post("/knowledgeBase/update", data);
   return response;
 };
 

@@ -43,7 +43,7 @@ export default function FileuploadPage() {
     console.log("----onSubmitKnowledgeBase:---- ", filepath)
     if (!filepath) return;
     try {
-      const updateResponse = await updateKnowledgeBase({filepath: filepath});
+      const updateResponse = await updateKnowledgeBase({filepath});
       console.log("updateResponse: ", updateResponse);
       // setResult(updateResponse.data);
       enqueueSnackbar("更新成功", {
@@ -69,11 +69,14 @@ export default function FileuploadPage() {
         gap: 2,
       }}
     >
-      <Uploader disabled={false} handleFileChange={setFile} accept="text/plain"/>
+       {/* accept="text/plain" */}
+      <Uploader disabled={false} handleFileChange={setFile}/>
       <Button onClick={handleUpload} disabled={!file}>
         上传文件
       </Button>
-      <Button onClick={onSubmitKnowledgeBase} disabled={!filepath}>
+      <Button onClick={onSubmitKnowledgeBase} 
+      disabled={!filepath}
+      >
         上传更新到知识库
       </Button>
     </Box>
