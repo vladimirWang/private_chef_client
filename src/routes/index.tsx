@@ -2,7 +2,7 @@ import { lazy } from "react";
 import { createHashRouter, type RouteObject } from "react-router-dom";
 import HomePage from "@/pages/HomePage";
 import LoginForm from "@/pages/LoginForm";
-import RegisterForm from "@/pages/RegisterForm";
+import RegisterPage from "@/pages/register/RegisterPage";
 // import ChatPage from "@/pages/ChatPage";
 import Layout from "@/Layout";
 import NotFound from "@/pages/NotFound";
@@ -36,7 +36,7 @@ export const routes: RouteObject[] = [
     },
     {
         path: "/landing/register",
-        Component: RegisterForm
+        Component: RegisterPage
     },
     {
         path: "*",

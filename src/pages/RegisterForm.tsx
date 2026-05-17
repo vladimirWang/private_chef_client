@@ -12,7 +12,9 @@ import {
 } from "@mui/material";
 import AuthShell from "@/components/auth/AuthShell";
 import { userRegister } from "@/api/user";
+import { Steps } from "antd-mobile";
 
+const { Step } = Steps;
 export default function RegisterForm() {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = React.useState("fernando");
