@@ -45,8 +45,11 @@ export default function FileuploadPage() {
     try {
       const updateResponse = await updateKnowledgeBase({filepath});
       console.log("updateResponse: ", updateResponse);
-      // setResult(updateResponse.data);
-      enqueueSnackbar("更新成功", {
+      const detail =
+        typeof updateResponse?.message === "string"
+          ? updateResponse.message
+          : "更新成功";
+      enqueueSnackbar(detail, {
         variant: "error",
         preventDuplicate: true,
       });
