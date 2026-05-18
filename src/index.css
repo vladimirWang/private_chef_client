@@ -48,3 +48,8 @@ body {
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
+
+
+/* 全局样式加这 4 行 */
+.masonry-grid { display: flex; width: auto; margin-left: -10px; }
+.masonry-column { padding-left: 10px; }
