@@ -43,11 +43,11 @@ export default function RegisterForm() {
         password,
         nickname: displayName.trim(),
       });
-      if (result.ok) {
-        navigate("/landing/login?registered=1", { replace: true });
-        return;
-      }
-      setFormError(result.error);
+      // if (result.ok) {
+      //   navigate("/landing/login?registered=1", { replace: true });
+      //   return;
+      // }
+      // setFormError(result.error);
     } finally {
       setSubmitting(false);
     }

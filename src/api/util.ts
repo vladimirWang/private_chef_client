@@ -3,7 +3,7 @@ import { bunApi } from "../utils/requestGenerator";
 export const uploadFile = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
-  const response = await bunApi.post("/util/uploadFile", formData);
+  const response = await bunApi.post<{url: string}>("/util/uploadFile", formData);
   return response;
 }
 

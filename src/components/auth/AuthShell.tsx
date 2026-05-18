@@ -36,7 +36,7 @@ function BrandMark({ size = 40 }: { size?: number }) {
 function HeroPanel() {
   return (
     <Box sx={{ position: "relative", zIndex: 1 }}>
-      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 4 }}>
+      <Stack direction="row" spacing={1.5} sx={{ mb: 4, alignItems: "center" }}>
         <BrandMark />
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2 }}>
@@ -80,7 +80,7 @@ function HeroPanel() {
         {authHighlights.map((text, index) => {
           const Icon = highlightIcons[index] ?? Sparkles;
           return (
-            <Stack key={text} direction="row" spacing={1.25} alignItems="flex-start">
+            <Stack key={text} direction="row" spacing={1.25} sx={{ alignItems: "flex-start" }}>
               <Box
                 sx={{
                   mt: 0.25,

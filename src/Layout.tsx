@@ -20,12 +20,15 @@ export default function Layout() {
           }
         //   badge: Badge.dot,
         },
-        // {
-        //   key: 'todo',
-        //   title: '待办',
-        //   icon: <UnorderedListOutline />,
-        //   badge: '5',
-        // },
+        {
+          key: 'todo',
+          title: '知识库',
+          icon: <UnorderedListOutline />,
+          badge: '5',
+          onclick: () => {
+            navigate('/fileupload')
+          }
+        },
         {
           key: 'messages',
           title: '对话',

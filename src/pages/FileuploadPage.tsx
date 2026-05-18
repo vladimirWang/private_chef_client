@@ -43,16 +43,8 @@ export default function FileuploadPage() {
     console.log("----onSubmitKnowledgeBase:---- ", filepath)
     if (!filepath) return;
     try {
-      const updateResponse = await updateKnowledgeBase({filepath});
-      console.log("updateResponse: ", updateResponse);
-      const detail =
-        typeof updateResponse?.message === "string"
-          ? updateResponse.message
-          : "更新成功";
-      enqueueSnackbar(detail, {
-        variant: "error",
-        preventDuplicate: true,
-      });
+      await updateKnowledgeBase({filepath});
+      console.log("上传更新到知识库成功");
     } catch (error) {
       console.error("上传更新到知识库失败:", error);
       return;
