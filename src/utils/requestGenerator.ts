@@ -1,8 +1,10 @@
 import axios, { type AxiosInstance, type AxiosResponse, type AxiosRequestConfig } from "axios";
 import { enqueueSnackbar } from "notistack";
 import { sleep } from "../utils/common";
-import { type IResponse } from "../api/commonDef";
+import { isIResponse, type IResponse } from "../api/commonDef";
 import { pyApiBaseURL } from "./pyApiPrefix";
+// import { Toast } from "antd-mobile";
+import toast from 'react-hot-toast'
 
 // 扩展 AxiosRequestConfig，添加自定义配置字段
 declare module "axios" {
@@ -16,13 +18,18 @@ declare module "axios" {
 
 // 自定义请求接口，返回 T 而不是 AxiosResponse<T>
 interface CustomAxiosInstance {
-	get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
-	post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
-	put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
-	patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
-	delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+	get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>;
+	post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+	put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+	patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
+	delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>;
 	interceptors: AxiosInstance["interceptors"];
 }
+
+/** Axios 拦截器签名要求返回 AxiosResponse，实际在运行时解包为 data，由 CustomAxiosInstance 对外暴露 */
+type AxiosResponseInterceptor = Parameters<
+	AxiosInstance["interceptors"]["response"]["use"]
+>[0];
 
 export const requestGenerator = (baseUrl: string) => {
 	// 1. 先封装全局 axios 实例（带拦截器、超时等配置）
@@ -44,47 +51,37 @@ export const requestGenerator = (baseUrl: string) => {
 	});
 
 	// 响应拦截器：统一处理响应结果提示
-	axiosInstance.interceptors.response.use(
-		<T = any>(response: AxiosResponse<T>) => {
-			const config = response.config;
-			const data = response.data;
+	const onResponseFulfilled = (response: AxiosResponse<IResponse<unknown>>) => {
+		const config = response.config;
+		const data = response.data;
 
-			// 检查响应是否符合 IResponse 格式
-			if (
-				data &&
-				typeof data === "object" &&
-				"code" in data &&
-				"message" in data &&
-				"data" in data
-			) {
-				const responseData = data as IResponse<any>;
-				const { code, message: msg } = responseData;
+		if (isIResponse(data)) {
+			const { code, message: msg, data: payload } = data;
+			console.log("code: ", code, "msg: ", msg, "payload: ", payload, 'method: ', config.method, config.showSuccessMessage)
 
-				// 判断是否成功（通常 code === 200 表示成功）
-				if (code === 200) {
-					// 成功：根据配置决定是否显示提示
-					const showSuccessMessage =
-						config.showSuccessMessage ??
-						(["post", "put", "patch", "delete"].includes(config.method as string) ? true : false);
-					if (showSuccessMessage && msg) {
-						// message.success(msg);
-					}
-					// 返回 data 字段
-					return responseData.data as T;
-				} else {
-					// 业务失败（HTTP 200 但 code !== 200）：根据配置决定是否显示提示
-					const showErrorMessage = config.showErrorMessage ?? true;
-					if (showErrorMessage && msg) {
-						// message.error(msg);
-					}
-					// 抛出错误（不会进入错误拦截器，因为 HTTP 状态码是 200）
-					return Promise.reject(responseData);
+			if (code === 200) {
+				const showSuccessMessage =
+					config.showSuccessMessage ??
+					(["post", "put", "patch", "delete"].includes(config.method as string) ? true : false);
+					console.log("showSuccessMessage: ", showSuccessMessage, "msg: ", msg)
+				if (showSuccessMessage && msg) {
+					toast.success(msg)
 				}
+				return payload;
 			}
 
-			// 如果不是 IResponse 格式，直接返回原始数据
-			return data as T;
-		},
+			const showErrorMessage = config.showErrorMessage ?? true;
+			if (showErrorMessage && msg) {
+				toast.error(msg)
+			}
+			return Promise.reject(data);
+		}
+
+		return data;
+	};
+
+	axiosInstance.interceptors.response.use(
+		onResponseFulfilled as AxiosResponseInterceptor,
 		async error => {
 			const config = error.config || {};
 			const showErrorMessage = config.showErrorMessage ?? true;
@@ -123,11 +120,11 @@ export const requestGenerator = (baseUrl: string) => {
 				}
 
 				// 如果后端返回的数据已经是统一格式（有 code 和 message）
-				if (data && typeof data === "object" && "code" in data && "message" in data) {
-					const responseData = data as IResponse<any>;
+				if (isIResponse(data)) {
+					const responseData = data;
 					// 如果配置允许显示，则显示错误提示
 					if (showErrorMessage && responseData.message) {
-						// message.error(responseData.message);
+						toast.success(responseData.message)
 					}
 					return Promise.reject(responseData);
 				}
@@ -135,7 +132,7 @@ export const requestGenerator = (baseUrl: string) => {
 				// 否则，构造统一格式的错误响应
 				const errorMessage = data?.message || error.message || "请求失败";
 				if (showErrorMessage) {
-					// message.error(errorMessage);
+					toast.error(errorMessage)
 				}
 				return Promise.reject({
 					code: status,
@@ -147,7 +144,7 @@ export const requestGenerator = (baseUrl: string) => {
 			// 网络错误或其他错误
 			const errorMessage = error.message || "网络错误";
 			if (showErrorMessage) {
-				// message.error(errorMessage);
+				toast.error(errorMessage)
 			}
 			return Promise.reject({
 				code: 0,

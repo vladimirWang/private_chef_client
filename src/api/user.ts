@@ -5,14 +5,19 @@ interface IUserRegister {
     password: string;
     nickname: string;
 }
-export const userRegister = (data: IUserRegister) => {
-    return bunApi.post("/user/register", data)
+export const userRegister = (data: IUserRegister, config?: { showSuccessMessage?: boolean }) => {
+    return bunApi.post("/user/register", data, {
+        showSuccessMessage: config?.showSuccessMessage
+    })
 }
 
 interface IUserLogin {
     email: string;
     password: string;
 }
+interface IUserLoginResponse {
+    token: string;
+}
 export const userLogin = (data: IUserLogin) => {
-    return bunApi.post("/user/login", data)
+    return bunApi.post<IUserLoginResponse>("/user/login", data)
 }

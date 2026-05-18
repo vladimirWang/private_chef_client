@@ -9,3 +9,13 @@ export interface IResponse<T> {
 	code: number;
 	message?: string;
 }
+
+export function isIResponse(value: unknown): value is IResponse<unknown> {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		"code" in value &&
+		"message" in value &&
+		"data" in value
+	);
+}

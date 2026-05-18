@@ -1,9 +1,10 @@
-import { Button, Form, Input } from 'antd-mobile';
+import { Button, Form, Input, Toast } from 'antd-mobile';
 import type { RuleObject } from 'antd-mobile/es/components/form';
 import React, { useRef } from 'react'
 import EmailVerification, { type EmailVerificationHandle } from '@/components/EmailVerification';
 import { userRegister } from '@/api/user';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast'
 
 interface VerificationProps {
   onNext: () => void;
@@ -70,6 +71,10 @@ export default function Verification(props: VerificationProps) {
 
   return (
     <div>
+        <button onClick={() => {
+            // Toast.show({content: 'msg'});
+            toast.error("errorMessage")
+        }}>click</button>
       <Form form={form} layout='horizontal' onFinish={handleSubmit} initialValues={initialValues}>
         <Item
           label='邮箱'
