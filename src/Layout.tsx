@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import {
     AppOutline,
     MessageOutline,
@@ -9,25 +9,32 @@ import {
 import { TabBar } from "antd-mobile";
 
 export default function Layout() {
+    const navigate = useNavigate();
     const tabs = [
         {
           key: 'home',
           title: '首页',
           icon: <AppOutline />,
+          onclick: () => {
+            navigate('/')
+          }
         //   badge: Badge.dot,
         },
+        // {
+        //   key: 'todo',
+        //   title: '待办',
+        //   icon: <UnorderedListOutline />,
+        //   badge: '5',
+        // },
         {
-          key: 'todo',
-          title: '待办',
-          icon: <UnorderedListOutline />,
-          badge: '5',
-        },
-        {
-          key: 'message',
+          key: 'messages',
           title: '对话',
           icon: (active: boolean) =>
             active ? <MessageFill /> : <MessageOutline />,
           badge: '99+',
+          onclick: () => {
+            navigate('/messages')
+          }
         },
         // {
         //   key: 'personalCenter',
@@ -42,7 +49,7 @@ export default function Layout() {
             </section>
             <TabBar style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white' }}>
                 {tabs.map(item => (
-                    <TabBar.Item key={item.key} icon={item.icon} title={item.title} />
+                    <TabBar.Item key={item.key} icon={item.icon} title={item.title} onClick={item.onclick}/>
                 ))}
             </TabBar>
         </div>

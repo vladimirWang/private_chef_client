@@ -9,6 +9,7 @@ import NotFound from "@/pages/NotFound";
 const yumPageLazy = lazy(() => import("@/pages/YumPage"));
 const fileuploadPageLazy = lazy(() => import("@/pages/FileuploadPage"));
 const galleryPageLazy = lazy(() => import("@/pages/GalleryPage"));
+const messagesPageLazy = lazy(() => import("@/pages/MessagesPage"));
 
 export const routes: RouteObject[] = [
     {
@@ -32,6 +33,9 @@ export const routes: RouteObject[] = [
     {
         path: "/yum",
         Component: yumPageLazy
+    },    {
+        path: "/messages",
+        Component: messagesPageLazy
     },
     {
         path: "/landing/login",
