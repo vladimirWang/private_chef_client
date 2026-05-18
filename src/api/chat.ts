@@ -1,5 +1,10 @@
 import { streamChatNew } from "@/utils/streamChatNew";
-import { bunApi } from "../utils/requestGenerator";
+import { bunApi, pyApi } from "../utils/requestGenerator";
+
+export type ApiChatMessage = {
+  role: "user" | "assistant" | "system";
+  content: string;
+};
 
 type StreamChatParams = {
   message: string;
@@ -129,6 +134,13 @@ function decodeSseOrRawText(buffer: string): { chunks: string[]; rest: string; d
 //     if (!onError) throw err;
 //   }
 // }
+
+export const getChatMessages = (threadId: string) => {
+  return pyApi.get<{ messages: ApiChatMessage[] }>("/api/v1/chat/messages", {
+    params: { thread_id: threadId },
+    showErrorMessage: false,
+  });
+};
 
 export const clearChatHistory = (threadId: string) => {
   return bunApi.delete("/chat/messages", {

@@ -3,8 +3,12 @@ import type { Message } from "@/types/chat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { uploadFile } from "../api/util";
-import { clearChatHistory, yumChatStream } from "../api/chat";
+import { clearChatHistory, getChatMessages, yumChatStream } from "../api/chat";
 import { generateUUID } from "@/utils/common";
+import {
+  sessionTitleFromMessage,
+  upsertChatSession,
+} from "@/utils/chatSessions";
 import { UtensilsCrossed, Plus, Menu, User, Bold } from "lucide-react";
 import Drawer from "@mui/material/Drawer";
 import Box from "@mui/material/Box";
@@ -52,7 +56,8 @@ export default function YumPage() {
   const consultStreamAbortRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageIdCounter = useRef(0);
-  const [question, setQuestion] = useState<undefined | string>("我体重160斤，尺码推荐");
+  // "我体重160斤，尺码推荐"
+  const [question, setQuestion] = useState<undefined | string>();
 
   const [result, setResult] = useState<null | string>(null);
 
@@ -79,6 +84,32 @@ export default function YumPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setMessages([]);
+    messageIdCounter.current = 0;
+    const loadHistory = async () => {
+      try {
+        const { messages: history } = await getChatMessages(threadId);
+        if (cancelled || !history?.length) return;
+        const loaded: Message[] = history.map((m, index) => ({
+          id: `history_${index}_${threadId}`,
+          role: m.role as Message["role"],
+          content: m.content,
+          timestamp: Date.now() - (history.length - index),
+        }));
+        messageIdCounter.current = loaded.length;
+        setMessages(loaded);
+      } catch (error) {
+        console.error("加载历史消息失败:", error);
+      }
+    };
+    void loadHistory();
+    return () => {
+      cancelled = true;
+    };
+  }, [threadId]);
 
   const addMessage = (message: Omit<Message, "id" | "timestamp">) => {
     messageIdCounter.current += 1;
@@ -120,10 +151,18 @@ export default function YumPage() {
     }
     console.log("imageUrl 1: ", imageUrl);
 
+    const userText = text || "上传了一张食材图片";
     addMessage({
       role: "user",
-      content: text || "上传了一张食材图片",
+      content: userText,
       imageUrl,
+    });
+
+    upsertChatSession({
+      threadId,
+      title: sessionTitleFromMessage(messageText || userText),
+      preview: userText,
+      updatedAt: Date.now(),
     });
 
     setProcessing(true);
@@ -154,6 +193,20 @@ export default function YumPage() {
       // );
     } finally {
       setProcessing(false);
+      setMessages((prev) => {
+        const firstUser = prev.find((m) => m.role === "user");
+        const lastAssistant = [...prev].reverse().find((m) => m.role === "assistant");
+        if (firstUser || lastAssistant) {
+          const preview = lastAssistant?.content?.trim() ?? firstUser?.content ?? "";
+          upsertChatSession({
+            threadId,
+            title: sessionTitleFromMessage(firstUser?.content ?? "AI 对话"),
+            preview: preview.length > 60 ? `${preview.slice(0, 60)}…` : preview,
+            updatedAt: Date.now(),
+          });
+        }
+        return prev;
+      });
     }
   };
 

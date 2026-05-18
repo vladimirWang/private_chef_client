@@ -27,15 +27,16 @@ export const routes: RouteObject[] = [
             {
                 path: "fileupload",
                 Component: fileuploadPageLazy
+            },
+            {
+                path: "messages",
+                Component: messagesPageLazy
             }
         ]
     },
     {
         path: "/yum",
         Component: yumPageLazy
-    },    {
-        path: "/messages",
-        Component: messagesPageLazy
     },
     {
         path: "/landing/login",
