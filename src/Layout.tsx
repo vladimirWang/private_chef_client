@@ -47,7 +47,7 @@ export default function Layout() {
             <section style={{paddingBottom: '50px'}}>
                 <Outlet />
             </section>
-            <TabBar style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white' }}>
+            <TabBar style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'white', boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.45)' }}>
                 {tabs.map(item => (
                     <TabBar.Item key={item.key} icon={item.icon} title={item.title} onClick={item.onclick}/>
                 ))}
