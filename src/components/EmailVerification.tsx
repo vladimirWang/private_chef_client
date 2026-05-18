@@ -1,5 +1,5 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { Button, Input, Modal } from "antd-mobile";
+import { Button, Divider, Input, Modal } from "antd-mobile";
 import { sendEmailVerificationCode, verifyEmail } from "@/api/util";
 
 interface EmailVerificationProps {
@@ -67,6 +67,8 @@ function EmailVerification(
     setSubmitLoading(true)
     try {
       await verifyEmail({email: props.email, code})
+    //   message.success("验证码正确")
+        setVisible(false)
     } finally {
       setSubmitLoading(false)
     }
@@ -81,18 +83,21 @@ function EmailVerification(
         title="邮箱验证"
         content={
           <>
-            <p>验证码已发送至邮箱：{props.email}</p>
+            <p className="text-xs text-gray-500">验证码已发送至<span className="text-sm font-bold">&nbsp;{props.email}&nbsp;</span></p>
             {/* <p>请在邮箱中查看验证码，并输入验证码</p> */}
-            <section className="flex items-center gap-2">
-                <Input
-                placeholder="请输入验证码"
-                value={code}
-                onChange={setCode}
-                />
-                <Button size="mini" style={{width: 110}} disabled={countdown > 0 || loading} onClick={handleSend}>{loading ? '发送中...': txt}</Button>
-                {/* <span style={{width: 85}} className="text-center bg-amber-500 text-sm text-gray-500">{txt}</span> */}
-            </section>
-            <Button block onClick={handleSubmit} loading={submitLoading}>提交</Button>
+            {/* <Divider /> */}
+            <div className="p-2 mt-2 border-t border-gray-300">
+                <section className="py-4 flex items-center gap-2">
+                    <Input
+                    placeholder="请输入验证码"
+                    value={code}
+                    onChange={setCode}
+                    />
+                    <Button size="mini" style={{width: 110}} disabled={countdown > 0 || loading} onClick={handleSend}>{loading ? '发送中...': txt}</Button>
+                    {/* <span style={{width: 85}} className="text-center bg-amber-500 text-sm text-gray-500">{txt}</span> */}
+                </section>
+                <Button color="primary" block size="small" onClick={handleSubmit} loading={submitLoading}>提交</Button>
+            </div>
           </>
         }
       />

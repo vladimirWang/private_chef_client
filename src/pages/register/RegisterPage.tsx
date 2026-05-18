@@ -10,12 +10,12 @@ export default function RegisterPage() {
     return (
         <div>
           {currentStep === 0 && <Verification onNext={() => setCurrentStep(1)} />}
-          {currentStep === 1 && <RegisterInfo onPrevious={() => setCurrentStep(0)} />}
-          <Steps current={currentStep}>
+          {/* {currentStep === 1 && <RegisterInfo onPrevious={() => setCurrentStep(0)} />} */}
+          {/* <Steps current={currentStep}>
             <Step title='标题1' description='描述' />
             <Step title='标题2' description='描述' />
             <Step title='标题3' description='描述' />
-          </Steps>
+          </Steps> */}
         </div>
       )
 }
