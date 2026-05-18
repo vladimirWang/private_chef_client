@@ -5,9 +5,11 @@ import { CheckCircleOutline } from 'antd-mobile-icons';
 
 interface EmailVerificationProps {
   email: string;
+  onUpdateResult: (result: boolean) => void;
 }
 export interface EmailVerificationHandle {
   sendCode: () => Promise<void>;
+  passVerification: boolean;
 }
 
 const COUNTDOWN_TIME = 60;
@@ -16,11 +18,17 @@ function EmailVerification(
   ref: React.Ref<EmailVerificationHandle>
 ) {
   const [visible, setVisible] = useState(false);
-  useImperativeHandle(ref, () => ({
-    sendCode: async () => {
-      return Promise.resolve();
-    },
-  }));
+  const [passVerification, setPassVerification] = useState(false);
+  useImperativeHandle(
+    ref,
+    () => ({
+      sendCode: async () => {
+        return Promise.resolve();
+      },
+      passVerification,
+    }),
+    [passVerification],
+  );
   const [code, setCode] = useState("");
   const [countdown, setCountdown] = useState(COUNTDOWN_TIME);
   const txt =useMemo(() => {
@@ -67,7 +75,9 @@ function EmailVerification(
   const handleSubmit = async() => {
     setSubmitLoading(true)
     try {
-      await verifyEmail({email: props.email, code})
+      const resp = await verifyEmail({email: props.email, code})
+      console.log('resp: ', resp)
+      props.onUpdateResult(typeof resp.result === 'boolean' ? resp.result : false)
     //   message.success("验证码正确")
         setVisible(false)
         setPassVerification(true)
@@ -76,7 +86,6 @@ function EmailVerification(
     }
   }
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [passVerification, setPassVerification] = useState(false);
   return (
     <div>
       {

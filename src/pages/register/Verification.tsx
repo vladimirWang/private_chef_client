@@ -3,7 +3,7 @@ import type { RuleObject } from 'antd-mobile/es/components/form';
 import React, { useRef } from 'react'
 import EmailVerification, { type EmailVerificationHandle } from '@/components/EmailVerification';
 import { userRegister } from '@/api/user';
-import { QuestionCircleOutline } from 'antd-mobile-icons';
+import { useNavigate } from 'react-router-dom';
 
 interface VerificationProps {
   onNext: () => void;
@@ -24,16 +24,18 @@ interface VerificationFormValues {
 }
 const {Item, useForm, useWatch} = Form
 export default function Verification(props: VerificationProps) {
-  const [sendingCode, setSendingCode] = React.useState(false)
+    const navigate = useNavigate()
   const [loading, setLoading] = React.useState(false)
   const [form] = useForm()
+  const emailVerificationRef = useRef<EmailVerificationHandle>(null)
 
   const handleSubmit = async (values: VerificationFormValues) => {
     try {
       setLoading(true)
       console.log('Received values:', values);
       await userRegister(values)
-      props.onNext()
+      navigate('/landing/login')
+    //   props.onNext()
     } catch (error) {
       console.error('Error occurred:', error);
     } finally {
@@ -41,30 +43,47 @@ export default function Verification(props: VerificationProps) {
     }
   }
 
-  const handleSendVerificationCode = async () => {
-    
+  const emailValue = useWatch('email', form)
+
+  const validateEmailVerified = (
+    _rule: RuleObject,
+    _value: string,
+    callback: (error?: string) => void,
+  ) => {
+    if (emailVerificationRef.current?.passVerification) {
+      return Promise.resolve()
+    }
+    return Promise.reject(new Error('请先完成邮箱验证'))
   }
 
-  const emailValue = useWatch('email', form)
-  const emailVerificationRef = useRef<EmailVerificationHandle>(null)
   const validatePasswordConfirm = (
     _rule: RuleObject,
     value: string,
     callback: (error?: string) => void,
   ) => {
     if (!value || value === form.getFieldValue('password')) {
-      callback()
-      return
+    //   callback()
+      return Promise.resolve()
     }
-    callback('两次输入的密码不一致')
+    return Promise.reject(new Error('两次输入的密码不一致'))
   }
 
   return (
     <div>
       <Form form={form} layout='horizontal' onFinish={handleSubmit} initialValues={initialValues}>
-        <Item label='邮箱' name='email' rules={[{required: true, message: '请输入邮箱'}]} 
-            extra={<EmailVerification email={emailValue} />}
-            // helpIcon={<QuestionCircleOutline />}
+        <Item
+          label='邮箱'
+          name='email'
+          rules={[
+            { required: true, message: '请输入邮箱', validateTrigger: ['onChange', 'onBlur'] },
+            { validator: validateEmailVerified, validateTrigger: 'onSubmit' },
+          ]}
+          extra={<EmailVerification key={emailValue} ref={emailVerificationRef} email={emailValue ?? ''}
+            onUpdateResult={(result: boolean) => {
+                console.log('onUpdateResult: ', result)
+                form.setFields([{name: 'email', errors: result ? [] : ['邮箱验证失败']}])
+            }}
+          />}
         >
           <Input placeholder='请输入邮箱' />
         </Item>
@@ -72,7 +91,7 @@ export default function Verification(props: VerificationProps) {
           <Input type="password" placeholder='请输入密码' />
         </Item>
         <Item label='密码确认' name='passwordConfirm' rules={[{validator: validatePasswordConfirm}]}>
-          <Input type="password" placeholder='请输入密码' />
+          <Input type="password" placeholder='请再次输入密码' />
         </Item>
         <Item>
           <section>
