@@ -13,7 +13,9 @@ import {
   Typography,
 } from "@mui/material";
 import AuthShell from "@/components/auth/AuthShell";
-import {userLogin} from '@/api/user'
+import {userLogin, getUserSalt} from '@/api/user'
+import { getNonce } from "@/api/util";
+import { hashPassword } from "@/utils/algo";
 
 function postLoginPathFromWindow(search: string): string {
   const raw = new URLSearchParams(search).get("from")?.trim() ?? "";
@@ -35,7 +37,7 @@ export default function LoginForm() {
   const navigate = useNavigate();
   const [search] = useSearchParams();
   const [email, setEmail] = React.useState("413114463@qq.com");
-  const [password, setPassword] = React.useState("12345678");
+  const [password, setPassword] = React.useState("123456");
   const [remember, setRemember] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [formError, setFormError] = React.useState<string | null>(null);
@@ -45,9 +47,14 @@ export default function LoginForm() {
     setFormError(null);
     setSubmitting(true);
     try {
+      const nonce = await getNonce();
+      console.log("nonce: ", nonce)
+      const salt = await getUserSalt(email.trim())
+      const passwordHash = await hashPassword(password, nonce, salt);
       const result = await userLogin({
         email: email.trim(),
-        password,
+        password: passwordHash,
+        nonce
         // remember,
       });
       console.log("result: ", result)
