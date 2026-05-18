@@ -1,21 +1,14 @@
-import { Steps } from 'antd-mobile';
-import React, { useState } from 'react'
-import Verification from './Verification';
-import RegisterInfo from './RegisterInfo';
-
-const { Step } = Steps;
+import AuthShell from "@/components/auth/AuthShell";
+import Verification from "./Verification";
 
 export default function RegisterPage() {
-  const [currentStep, setCurrentStep] = useState(0);
-    return (
-        <div>
-          {currentStep === 0 && <Verification onNext={() => setCurrentStep(1)} />}
-          {/* {currentStep === 1 && <RegisterInfo onPrevious={() => setCurrentStep(0)} />} */}
-          {/* <Steps current={currentStep}>
-            <Step title='标题1' description='描述' />
-            <Step title='标题2' description='描述' />
-            <Step title='标题3' description='描述' />
-          </Steps> */}
-        </div>
-      )
+  return (
+    <AuthShell
+      title="开启成长膳食之旅"
+      subtitle="注册后即可与 AI 对话，获取贴合青少年发育阶段的个性化饮食建议。"
+      altCta={{ preface: "已有账号？", label: "去登录", href: "/landing/login" }}
+    >
+      <Verification onNext={() => undefined} />
+    </AuthShell>
+  );
 }

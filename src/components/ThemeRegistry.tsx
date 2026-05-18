@@ -10,8 +10,9 @@ const emotionCache = createCache({ key: "mui", prepend: true });
 const theme = createTheme({
   palette: {
     mode: "light",
-    primary: { main: "#d97706" },
-    background: { default: "#f4f4f5", paper: "#ffffff" },
+    primary: { main: "#059669", dark: "#047857", light: "#34d399" },
+    secondary: { main: "#0ea5e9" },
+    background: { default: "#f0fdf4", paper: "#ffffff" },
   },
   shape: { borderRadius: 12 },
   typography: {

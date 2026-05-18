@@ -44,7 +44,7 @@ export default function RegisterForm() {
         nickname: displayName.trim(),
       });
       if (result.ok) {
-        navigate("/login?registered=1", { replace: true });
+        navigate("/landing/login?registered=1", { replace: true });
         return;
       }
       setFormError(result.error);
@@ -55,8 +55,8 @@ export default function RegisterForm() {
 
   return (
     <AuthShell
-      title="创建账号"
-      subtitle="填写基本信息，即可开始使用私厨预约与菜单服务。"
+      title="开启成长膳食之旅"
+      subtitle="注册后即可与 AI 对话，获取贴合青少年发育阶段的个性化饮食建议。"
       altCta={{ preface: "已有账号？", label: "去登录", href: "/landing/login" }}
     >
       <Box component="form" onSubmit={handleSubmit} noValidate>
@@ -70,7 +70,8 @@ export default function RegisterForm() {
             required
             fullWidth
             id="displayName"
-            label="称呼或昵称"
+            label="昵称"
+            placeholder="例如：小明同学"
             name="displayName"
             autoComplete="name"
             autoFocus
@@ -118,7 +119,7 @@ export default function RegisterForm() {
                 color="primary"
               />
             }
-            label="我已阅读并同意服务条款与隐私政策"
+            label="我已阅读并同意《用户协议》与《隐私政策》，知悉本服务提供的膳食建议仅供参考"
           />
           <Button
             type="submit"

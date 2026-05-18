@@ -92,7 +92,7 @@ function EmailVerification(
         passVerification ? (
           <CheckCircleOutline style={{color: "green"}}/>
         ) : (
-          <Button size="mini" onClick={handleSend}>发送验证码</Button>
+          <Button size="mini" onClick={handleSend}>校验邮箱</Button>
         )
       }
       <Modal

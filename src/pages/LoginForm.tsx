@@ -30,14 +30,14 @@ function RegisteredBanner() {
   if (params.get("registered") !== "1") {
     return null;
   }
-  return <Alert severity="success">注册成功，请使用邮箱登录。</Alert>;
+  return <Alert severity="success">注册成功！登录后即可开始 AI 膳食咨询。</Alert>;
 }
 
 export default function LoginForm() {
   const navigate = useNavigate();
   const [search] = useSearchParams();
-  const [email, setEmail] = React.useState("413114463@qq.com");
-  const [password, setPassword] = React.useState("123456");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [remember, setRemember] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [formError, setFormError] = React.useState<string | null>(null);
@@ -69,8 +69,8 @@ export default function LoginForm() {
   return (
     <AuthShell
       title="欢迎回来"
-      subtitle="登录后可同步偏好、管理预约与家宴计划。"
-      altCta={{ preface: "还没有账号？", label: "立即注册", href: "/landing/register" }}
+      subtitle="登录后继续与 AI 膳食顾问对话，查看为你定制的成长营养建议与饮食记录。"
+      altCta={{ preface: "还没有账号？", label: "免费注册", href: "/landing/register" }}
     >
       <Box component="form" onSubmit={handleSubmit} noValidate>
         <Stack spacing={2.5}>
@@ -92,6 +92,7 @@ export default function LoginForm() {
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            placeholder="用于登录与接收营养报告"
           />
           <TextField
             required
@@ -103,6 +104,7 @@ export default function LoginForm() {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            placeholder="请输入密码"
           />
           <Box
             sx={{
@@ -113,7 +115,7 @@ export default function LoginForm() {
               gap: 1,
             }}
           >
-            <FormControlLabel
+            {/* <FormControlLabel
               control={
                 <Checkbox
                   checked={remember}
@@ -122,7 +124,7 @@ export default function LoginForm() {
                 />
               }
               label="记住我"
-            />
+            /> */}
             <Typography
               variant="body2"
               component={RouterLink}

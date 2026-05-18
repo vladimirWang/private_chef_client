@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { ChefHat } from "lucide-react";
-import { Box, Typography } from "@mui/material";
-import { HOME_CARD_SHADOW } from "@/theme/homeChrome";
+import { Apple, Sparkles, Sprout, TrendingUp } from "lucide-react";
+import { Box, Chip, Stack, Typography } from "@mui/material";
+import { authBrand, authColors, authHighlights } from "@/theme/authTheme";
 
 export type AuthShellProps = {
   title: string;
@@ -10,6 +10,146 @@ export type AuthShellProps = {
   children: React.ReactNode;
   altCta?: { preface: string; label: string; href: string };
 };
+
+const highlightIcons = [Sprout, TrendingUp, Apple] as const;
+
+function BrandMark({ size = 40 }: { size?: number }) {
+  return (
+    <Box
+      sx={{
+        width: size,
+        height: size,
+        borderRadius: "14px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(255,255,255,0.18)",
+        backdropFilter: "blur(8px)",
+        border: "1px solid rgba(255,255,255,0.28)",
+      }}
+    >
+      <Sprout size={size * 0.55} strokeWidth={2} aria-hidden />
+    </Box>
+  );
+}
+
+function HeroPanel() {
+  return (
+    <Box sx={{ position: "relative", zIndex: 1 }}>
+      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 4 }}>
+        <BrandMark />
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+            {authBrand.name}
+          </Typography>
+          <Typography variant="caption" sx={{ opacity: 0.85, display: "block", mt: 0.25 }}>
+            青少年成长 · AI 膳食助手
+          </Typography>
+        </Box>
+      </Stack>
+
+      <Typography
+        variant="h3"
+        sx={{
+          fontWeight: 800,
+          letterSpacing: "-0.03em",
+          lineHeight: 1.2,
+          mb: 2,
+          fontSize: { md: "2.1rem", lg: "2.5rem" },
+        }}
+      >
+        吃得对，
+        <br />
+        长得稳
+      </Typography>
+
+      <Typography
+        variant="body1"
+        sx={{
+          opacity: 0.92,
+          lineHeight: 1.75,
+          maxWidth: 380,
+          mb: 3.5,
+          fontSize: "0.95rem",
+        }}
+      >
+        {authBrand.tagline}
+      </Typography>
+
+      <Stack spacing={1.5}>
+        {authHighlights.map((text, index) => {
+          const Icon = highlightIcons[index] ?? Sparkles;
+          return (
+            <Stack key={text} direction="row" spacing={1.25} alignItems="flex-start">
+              <Box
+                sx={{
+                  mt: 0.25,
+                  width: 28,
+                  height: 28,
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  bgcolor: "rgba(255,255,255,0.14)",
+                  flexShrink: 0,
+                }}
+              >
+                <Icon size={15} strokeWidth={2.25} aria-hidden />
+              </Box>
+              <Typography variant="body2" sx={{ lineHeight: 1.55, opacity: 0.95 }}>
+                {text}
+              </Typography>
+            </Stack>
+          );
+        })}
+      </Stack>
+    </Box>
+  );
+}
+
+function DecorativeBlobs() {
+  return (
+    <>
+      <Box
+        sx={{
+          position: "absolute",
+          width: 280,
+          height: 280,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.1)",
+          top: -72,
+          right: -64,
+          pointerEvents: "none",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 200,
+          height: 200,
+          borderRadius: "50%",
+          background: "rgba(255,255,255,0.06)",
+          bottom: 48,
+          left: -48,
+          pointerEvents: "none",
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 120,
+          height: 120,
+          borderRadius: "24px",
+          rotate: "12deg",
+          background: "rgba(251, 191, 36, 0.15)",
+          bottom: 120,
+          right: 32,
+          pointerEvents: "none",
+        }}
+      />
+    </>
+  );
+}
 
 export default function AuthShell({
   title,
@@ -20,10 +160,10 @@ export default function AuthShell({
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
-        bgcolor: "background.default",
+        background: authColors.pageBg,
       }}
     >
       <Box
@@ -33,94 +173,38 @@ export default function AuthShell({
           gap: 1.5,
           px: 2,
           py: 2,
-          background:
-            "linear-gradient(160deg, #431407 0%, #7c2d12 42%, #b45309 100%)",
+          background: authColors.heroGradient,
           color: "common.white",
         }}
       >
-        <ChefHat size={28} strokeWidth={1.75} aria-hidden />
-        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-          Private Chef
-        </Typography>
+        <BrandMark size={36} />
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+            {authBrand.name}
+          </Typography>
+          <Typography variant="caption" sx={{ opacity: 0.88 }}>
+            {authBrand.tagline}
+          </Typography>
+        </Box>
       </Box>
 
       <Box
         sx={{
           display: { xs: "none", md: "flex" },
-          flex: "0 0 42%",
-          maxWidth: { md: 540 },
+          flex: "0 0 44%",
+          maxWidth: { md: 520 },
           flexDirection: "column",
           justifyContent: "center",
-          px: { md: 6, lg: 8 },
+          px: { md: 5, lg: 7 },
           py: 8,
-          background:
-            "linear-gradient(160deg, #431407 0%, #7c2d12 42%, #b45309 100%)",
+          background: authColors.heroGradient,
           color: "common.white",
           position: "relative",
           overflow: "hidden",
         }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            width: 320,
-            height: 320,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.06)",
-            top: -80,
-            right: -80,
-            pointerEvents: "none",
-          }}
-        />
-        <Box
-          sx={{
-            position: "absolute",
-            width: 220,
-            height: 220,
-            borderRadius: "50%",
-            background: "rgba(255,255,255,0.04)",
-            bottom: 40,
-            left: -60,
-            pointerEvents: "none",
-          }}
-        />
-        <Box sx={{ position: "relative", zIndex: 1 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 4 }}>
-            <ChefHat size={40} strokeWidth={1.5} aria-hidden />
-            <Typography
-              variant="h5"
-              sx={{ fontWeight: 700, letterSpacing: "-0.02em" }}
-            >
-              Private Chef
-            </Typography>
-          </Box>
-          <Typography
-            variant="h3"
-            sx={{
-              fontWeight: 700,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.15,
-              mb: 2,
-              fontSize: { md: "2.25rem", lg: "2.75rem" },
-            }}
-          >
-            私宴风味
-            <br />
-            由此开启
-          </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 400,
-              opacity: 0.88,
-              lineHeight: 1.6,
-              maxWidth: 400,
-              fontSize: "1rem",
-            }}
-          >
-            为每一次家宴匹配专属菜单与主厨服务，让餐桌成为家的中心。
-          </Typography>
-        </Box>
+        <DecorativeBlobs />
+        <HeroPanel />
       </Box>
 
       <Box
@@ -135,14 +219,39 @@ export default function AuthShell({
         }}
       >
         <Box sx={{ width: "100%", maxWidth: 440 }}>
+          <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap", gap: 1 }}>
+            <Chip
+              size="small"
+              icon={<Sparkles size={14} />}
+              label="AI 膳食顾问"
+              sx={{
+                bgcolor: "rgba(5, 150, 105, 0.1)",
+                color: authColors.primaryDark,
+                fontWeight: 600,
+                border: `1px solid ${authColors.cardBorder}`,
+                "& .MuiChip-icon": { color: authColors.primary },
+              }}
+            />
+            <Chip
+              size="small"
+              label="4–10 岁成长营养"
+              sx={{
+                bgcolor: "rgba(56, 189, 248, 0.1)",
+                color: "#0369a1",
+                fontWeight: 600,
+                border: "1px solid rgba(56, 189, 248, 0.2)",
+              }}
+            />
+          </Stack>
+
           <Typography
             variant="h4"
             component="h1"
             sx={{
-              fontWeight: 700,
-              letterSpacing: "-0.02em",
+              fontWeight: 800,
+              letterSpacing: "-0.03em",
               mb: subtitle ? 1 : 3,
-              color: "text.primary",
+              color: "#0f172a",
             }}
           >
             {title}
@@ -150,20 +259,19 @@ export default function AuthShell({
           {subtitle ? (
             <Typography
               variant="body1"
-              color="text.secondary"
-              sx={{ mb: 4, lineHeight: 1.6 }}
+              sx={{ mb: 3, lineHeight: 1.7, color: "#64748b" }}
             >
               {subtitle}
             </Typography>
           ) : null}
           <Box
             sx={{
-              bgcolor: "background.paper",
-              borderRadius: 2,
+              bgcolor: "#ffffff",
+              borderRadius: 3,
               border: "1px solid",
-              borderColor: "divider",
-              boxShadow: HOME_CARD_SHADOW,
-              p: { xs: 3, sm: 4 },
+              borderColor: authColors.cardBorder,
+              boxShadow: authColors.cardShadow,
+              p: { xs: 2.5, sm: 3.5 },
             }}
           >
             {children}
@@ -171,8 +279,7 @@ export default function AuthShell({
           {altCta ? (
             <Typography
               variant="body2"
-              color="text.secondary"
-              sx={{ mt: 3, textAlign: "center" }}
+              sx={{ mt: 3, textAlign: "center", color: "#64748b" }}
             >
               {altCta.preface}{" "}
               <Typography
@@ -181,7 +288,7 @@ export default function AuthShell({
                 variant="body2"
                 sx={{
                   fontWeight: 600,
-                  color: "primary.main",
+                  color: authColors.primary,
                   textDecoration: "none",
                   "&:hover": { textDecoration: "underline" },
                 }}
