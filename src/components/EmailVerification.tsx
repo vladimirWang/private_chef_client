@@ -1,6 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Button, Divider, Input, Modal } from "antd-mobile";
 import { sendEmailVerificationCode, verifyEmail } from "@/api/util";
+import { CheckCircleOutline } from 'antd-mobile-icons';
 
 interface EmailVerificationProps {
   email: string;
@@ -69,14 +70,22 @@ function EmailVerification(
       await verifyEmail({email: props.email, code})
     //   message.success("验证码正确")
         setVisible(false)
+        setPassVerification(true)
     } finally {
       setSubmitLoading(false)
     }
   }
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [passVerification, setPassVerification] = useState(false);
   return (
     <div>
-      <Button size="mini" onClick={handleSend}>发送验证码</Button>
+      {
+        passVerification ? (
+          <CheckCircleOutline style={{color: "green"}}/>
+        ) : (
+          <Button size="mini" onClick={handleSend}>发送验证码</Button>
+        )
+      }
       <Modal
         visible={visible}
         onClose={() => setVisible(false)}

@@ -3,6 +3,7 @@ import type { RuleObject } from 'antd-mobile/es/components/form';
 import React, { useRef } from 'react'
 import EmailVerification, { type EmailVerificationHandle } from '@/components/EmailVerification';
 import { userRegister } from '@/api/user';
+import { QuestionCircleOutline } from 'antd-mobile-icons';
 
 interface VerificationProps {
   onNext: () => void;
@@ -63,6 +64,7 @@ export default function Verification(props: VerificationProps) {
       <Form form={form} layout='horizontal' onFinish={handleSubmit} initialValues={initialValues}>
         <Item label='邮箱' name='email' rules={[{required: true, message: '请输入邮箱'}]} 
             extra={<EmailVerification email={emailValue} />}
+            // helpIcon={<QuestionCircleOutline />}
         >
           <Input placeholder='请输入邮箱' />
         </Item>
