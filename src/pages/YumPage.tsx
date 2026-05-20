@@ -3,7 +3,12 @@ import type { Message } from "@/types/chat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { uploadFile } from "../api/util";
-import { clearChatHistory, getChatMessages, yumChatStream } from "../api/chat";
+import {
+  clearChatHistory,
+  getChatMessages,
+  type ApiChatHistoryMessage,
+  yumChatStream,
+} from "../api/chat";
 import { generateUUID } from "@/utils/common";
 import {
   sessionTitleFromMessage,
@@ -36,11 +41,25 @@ const userPng = new URL('../assets/user.webp', import.meta.url).href
 console.log("---robotPng---", robotPng)
 
 const CONTENT_MAX_PX = 896;
+const INPUT_BAR_HEIGHT_PX = 56;
+
+function historyToMessages(history: ApiChatHistoryMessage[]): Message[] {
+  return history
+    .filter((m) => (m.content ?? "").trim())
+    .map((m, index) => ({
+      id: `history_${m.id}`,
+      role: (["user", "assistant", "system"].includes(m.role)
+        ? m.role
+        : "assistant") as Message["role"],
+      content: m.content,
+      timestamp: m.created_at_ms,
+        // m.created_at_ms ?? m.createdAtMs ?? Date.now() - (history.length - index),
+    }));
+}
 
 export default function YumPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    // {"role": "assistant", "content": "robot 是英语名词，核心释义包含三类：1.由计算机控制的自动化机械设备（如工业机器人、手术机器人），2.形容机械般缺乏情感的人（含贬义），3.在南非英语中专指交通信号灯 [2] [4-5]。该词源自捷克语“robota”（意为“苦役”）或“robotnik”（意为“农奴”），由捷克作家卡雷尔·恰佩克于1921年在其剧作《罗素姆万能机器人》中引入英语并流行开来 [12-15]。该词英美发音存在差异，英国音标为/ˈrəʊ.bɒt/，美国音标为/ˈroʊ.bɑːt/，分解发音包含/r/、/əʊ/或/oʊ/等音素组合 [1] [4]。其复数形式为robots，派生词包含robotic（形容词）和robotics（机器人技术） [3] [6]。在应用场景中，既涵盖汽车制造、医疗手术等工业领域，也延伸至科幻文学与人工智能伦理探讨 [3] [5]。其发展历程中的重要节点包括1939年世博会首次展出机器人Elektro，1973年诞生首台真人大小的拟人机器人WABOT-1，以及阿西莫夫提出机器人三定律、图灵提出图灵测试等 [14]。2025年前后，人形机器人领域受到关注，中国是相关市场的主要参与者之一；《人形机器人"}
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [threadId, setThreadId] = useState<string>(() => {
@@ -84,32 +103,27 @@ export default function YumPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
   useEffect(() => {
     let cancelled = false;
-    setMessages([]);
-    messageIdCounter.current = 0;
     const loadHistory = async () => {
+      setHistoryLoading(true);
       try {
-        const { messages: history } = await getChatMessages(threadId);
+        const { messages: history } = await getChatMessages();
         if (cancelled || !history?.length) return;
-        const loaded: Message[] = history.map((m, index) => ({
-          id: `history_${index}_${threadId}`,
-          role: m.role as Message["role"],
-          content: m.content,
-          timestamp: Date.now() - (history.length - index),
-        }));
+        const loaded = historyToMessages(history);
         messageIdCounter.current = loaded.length;
         setMessages(loaded);
       } catch (error) {
         console.error("加载历史消息失败:", error);
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
       }
     };
     void loadHistory();
     return () => {
       cancelled = true;
     };
-  }, [threadId]);
+  }, []);
 
   const addMessage = (message: Omit<Message, "id" | "timestamp">) => {
     messageIdCounter.current += 1;
@@ -263,12 +277,19 @@ export default function YumPage() {
       if (consultStreamAbortRef.current === controller) {
         consultStreamAbortRef.current = null;
       }
-      setQuestionLoading(false);
+      // setQuestionLoading(false);
     }
   };
 
   return (
-    <div style={{background: '#e9e9e9', height: '100vh'}}> 
+    <div
+      style={{
+        background: "#e9e9e9",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <Drawer
         anchor="left"
         open={menuOpen}
@@ -407,21 +428,37 @@ export default function YumPage() {
           </CardContent>
         </Card>
       </Box> */}
-      {
-        messages.length> 0 ? <section style={{background: 'white', padding: 10}}>
-        {
-          messages.map((message, idx) => {
+      <section
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          background: "white",
+          padding: 10,
+          paddingBottom: INPUT_BAR_HEIGHT_PX + 24,
+        }}
+      >
+        {historyLoading ? (
+          <Typography variant="body2" sx={{ color: "text.secondary", textAlign: "center", py: 3 }}>
+            加载对话中…
+          </Typography>
+        ) : messages.length === 0 ? (
+          <Typography variant="body2" sx={{ color: "text.secondary", textAlign: "center", py: 3 }}>
+            暂无对话，输入问题开始咨询
+          </Typography>
+        ) : (
+          messages.map((message) => {
             return (
-              <div key={idx} style={{marginBottom: 20}}>
+              <div key={message.id} style={{marginBottom: 20}}>
                 {
                   message.role === 'assistant' ?
                   <>
-                    <div style={{width: '100%', display: "flex", justifyContent: 'start'}}>
+                    {/* <div style={{width: '100%', display: "flex", justifyContent: 'start'}}>
                       <Image width={60} src={robotPng}/>
-                    </div>
-                    <article>
+                    </div> */}
+                    <article className="bg-gray-200 max-w-[360px] rounded-lg p-2">
                       <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", alignSelf: "stretch", maxWidth: "min(720px, 100%)" }}>
                         {message.content}
+                        {message.streaming ? "▍" : null}
                       </Typography>
                     </article>
                   </>
@@ -435,8 +472,8 @@ export default function YumPage() {
                       gap: 4,
                     }}
                   >
-                    <Image width={60} src={userPng} />
-                    <article style={{ maxWidth: "min(720px, 100%)" }}>
+                    {/* <Image width={60} src={userPng} /> */}
+                    <article style={{ maxWidth: "min(720px, 100%)" }} className="bg-emerald-300 rounded-lg p-2">
                       <Typography
                         variant="body1"
                         sx={{ whiteSpace: "pre-wrap", textAlign: "right" }}
@@ -450,29 +487,35 @@ export default function YumPage() {
               </div>
             )
           })
-        }
-      </section>: null
-      }
-      {
-        questionLoading? <article style={{fontSize: 18, color: 'gray', fontWeight: 'bold', padding: 5,paddingLeft: 20}}>loading...</article> : null
-      }
-      <div style={{background: 'white', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10, display: 'flex', gap: 10, position: 'fixed', bottom: 10, left: 0, right: 0, width: '100%'}}>
-        <Input style={{flex: 1}} value={question} onChange={(value) => {
-          // console.log("e", e.currentTarget)
-          setQuestion(value)
-        }}/>
-        {
-          questionLoading ? 
-          <Button aria-label="停止生成" onClick={stopConsultStream}>
-            <svg viewBox="0 0 24 24" width="24" height="24">
-              <rect x="3" y="3" width="18" height="18" fill="black" stroke="currentColor" strokeWidth="2" />
-            </svg>
-          </Button> :
-          <Button loading={questionLoading} onClick={onConsult} color="primary" disabled={question?.trim() === ''}>
-          咨询
-          </Button>
+        )}
+        <div ref={messagesEndRef} />
+      </section>
+      {/* {questionLoading ? (
+        <article style={{ fontSize: 14, color: "gray", padding: "4px 20px", flexShrink: 0 }}>
+          正在回复…
+        </article>
+      ) : null} */}
+      <section className="fixed bottom-0 left-0 right-0 w-full py-1 px-3 pb-4">
+        <div className="rounded-lg shadow-[0_0_24px_rgba(0,0,0,0.38)]" style={{ paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10, display: 'flex', gap: 10, 
+          // position: 'fixed', bottom: 10, left: 0, right: 0, width: '100%'
+        }}>
+          <Input style={{flex: 1}} value={question} onChange={(value) => {
+            // console.log("e", e.currentTarget)
+            setQuestion(value)
+          }}/>
+          {
+            questionLoading ? 
+            <div onClick={stopConsultStream}>
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <rect x="6" y="6" width="12" height="12" fill="#333" stroke="currentColor" strokeWidth="2" />
+              </svg>
+            </div> :
+            <Button loading={questionLoading} onClick={onConsult} color="primary" disabled={question?.trim() === ''}>
+            咨询
+            </Button>
           }
-          </div>
+        </div>
+      </section>
     </div>
   );
 }

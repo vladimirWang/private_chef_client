@@ -1,0 +1,7 @@
+:root {
+  --adm-color-primary: #86e7b8;
+}
+
+html[data-prefers-color-scheme="dark"] {
+  --adm-color-primary: #86e7b8;
+}

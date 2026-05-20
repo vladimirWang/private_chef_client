@@ -6,6 +6,15 @@ export type ApiChatMessage = {
   content: string;
 };
 
+/** 与 agent LoadChatHistory 对齐（gRPC 可能为 snake 或 camelCase） */
+export type ApiChatHistoryMessage = {
+  role: string;
+  content: string;
+  id?: number;
+  created_at_ms: number;
+  // createdAtMs?: number;
+};
+
 type StreamChatParams = {
   message: string;
   threadId: string;
@@ -135,9 +144,8 @@ function decodeSseOrRawText(buffer: string): { chunks: string[]; rest: string; d
 //   }
 // }
 
-export const getChatMessages = (threadId: string) => {
-  return pyApi.get<{ messages: ApiChatMessage[] }>("/api/v1/chat/messages", {
-    params: { thread_id: threadId },
+export const getChatMessages = () => {
+  return bunApi.get<{ messages: ApiChatHistoryMessage[] }>("/chat/messages", {
     showErrorMessage: false,
   });
 };
