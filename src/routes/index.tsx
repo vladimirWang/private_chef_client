@@ -6,7 +6,7 @@ import RegisterPage from "@/pages/register/RegisterPage";
 // import ChatPage from "@/pages/ChatPage";
 import Layout from "@/Layout";
 import NotFound from "@/pages/NotFound";
-const yumPageLazy = lazy(() => import("@/pages/YumPage"));
+const yumPageLazy = lazy(() => import("@/pages/yum/YumPage"));
 const fileuploadPageLazy = lazy(() => import("@/pages/FileuploadPage"));
 const galleryPageLazy = lazy(() => import("@/pages/GalleryPage"));
 const messagesPageLazy = lazy(() => import("@/pages/MessagesPage"));

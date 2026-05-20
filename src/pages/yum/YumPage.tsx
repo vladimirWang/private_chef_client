@@ -2,39 +2,25 @@ import { useState, useEffect, useRef, useCallback, type ChangeEvent } from "reac
 import type { Message } from "@/types/chat";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
-import { uploadFile } from "../api/util";
+import { uploadFile } from "../../api/util";
 import {
   clearChatHistory,
   getChatMessages,
   type ApiChatHistoryMessage,
   yumChatStream,
-} from "../api/chat";
+} from "../../api/chat";
 import { generateUUID } from "@/utils/common";
 import {
   sessionTitleFromMessage,
   upsertChatSession,
 } from "@/utils/chatSessions";
-import { UtensilsCrossed, Plus, Menu, User, Bold } from "lucide-react";
-import Drawer from "@mui/material/Drawer";
-import Box from "@mui/material/Box";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
+import { Plus, Menu, User } from "lucide-react";
 import Typography from "@mui/material/Typography";
-import Divider from "@mui/material/Divider";
-import Avatar from "@mui/material/Avatar";
-// import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import IconButton from "@mui/material/IconButton";
 import { streamChat } from "@/utils/streamChat";
 import { streamChatNew } from "@/utils/streamChatNew";
-import { homeCardSurfaceSx, pageShellSx } from "@/theme/homeChrome";
 import { consultKnowledgeBaseStream, updateKnowledgeBase, chatConsultStream } from "@/api/clothing";
-import TextField from "@mui/material/TextField";
-import {Input, Button, Image} from 'antd-mobile'
-import {SearchOutline} from 'antd-mobile-icons'
+import { Input, Button, Popup } from "antd-mobile";
+import Drawer from "./Drawer";
 
 const robotPng = new URL('../assets/robot.gif', import.meta.url).href
 const userPng = new URL('../assets/user.webp', import.meta.url).href
@@ -290,144 +276,29 @@ export default function YumPage() {
         flexDirection: "column",
       }}
     >
-      <Drawer
-        anchor="left"
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        slotProps={{
-          backdrop: { sx: { backgroundColor: "rgba(0,0,0,0.45)" } },
-          paper: {
-            sx: {
-              width: { xs: "min(88vw, 320px)", sm: 320 },
-              height: "100%",
-              borderRight: "1px solid",
-              borderColor: "divider",
-              bgcolor: "background.paper",
-              display: "flex",
-              flexDirection: "column",
-            },
-          },
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            minHeight: 0,
-            height: "100%",
-          }}
-          role="presentation"
-        >
-          <Box sx={{ flex: 1, overflow: "auto", py: 2, minHeight: 0 }}>
-            <Typography
-              variant="subtitle2"
-              sx={{ px: 2, pb: 1, color: "text.secondary" }}
-            >
-              菜单
-            </Typography>
-            <Divider />
-            <List disablePadding>
-              <ListItemButton
-                onClick={() => {
-                  void handleNewChat();
-                }}
-                sx={{
-                  "&:hover": { bgcolor: "action.hover" },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  <Plus size={20} />
-                </ListItemIcon>
-                <ListItemText primary="新建会话" />
-              </ListItemButton>
-            </List>
-          </Box>
-          <Divider />
-          <Box
-            sx={{
-              p: 2,
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              flexShrink: 0,
-            }}
-          >
-            <Avatar
-              alt=""
-              sx={{
-                width: 40,
-                height: 40,
-                bgcolor: "grey.200",
-                color: "grey.700",
-              }}
-            >
-              <User size={22} strokeWidth={1.75} />
-            </Avatar>
-            <Button
-              fill="solid"
-              size="mini"
-              color="primary"
-              onClick={() => {
-                void handleLogout();
-              }}
-            >
-              退出登录
-            </Button>
-          </Box>
-        </Box>
-      </Drawer>
+      <Drawer menuOpen={menuOpen} setMenuOpen={setMenuOpen} handleNewChat={handleNewChat} />
 
-      {/* <Box
-        sx={{
-          pt: 2,
-          px: 2,
-          pb: 1,
-          maxWidth: CONTENT_MAX_PX,
-          width: "100%",
-          mx: "auto",
-          flexShrink: 0,
-        }}
-      >
-        <Card elevation={0} sx={{ ...homeCardSurfaceSx }}>
-          <CardContent
-            sx={{
-              py: 1.25,
-              px: 1.5,
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              "&:last-child": { pb: 1.25 },
-            }}
-          >
-            <IconButton
-              type="button"
-              onClick={() => setMenuOpen(true)}
-              aria-label="打开菜单"
-              size="small"
-              sx={{ color: "text.secondary" }}
-            >
-              <Menu size={22} strokeWidth={2} />
-            </IconButton>
-            <Typography
-              variant="h6"
-              sx={{ flex: 1, textAlign: "center", fontWeight: 700 }}
-            >
-              美食助手
-            </Typography>
-            <Button
-              type="button"
-              variant="contained"
-              size="small"
-              onClick={() => void handleNewChat()}
-              sx={{ minWidth: 40, px: 1 }}
-              aria-label="新建会话"
-            >
-              <Plus size={18} />
-            </Button>
-          </CardContent>
-        </Card>
-      </Box> */}
+      <header className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-3 py-2.5">
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-label="打开菜单"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 active:bg-slate-200"
+        >
+          <Menu size={22} strokeWidth={2} aria-hidden />
+        </button>
+        <h1 className="flex-1 text-center text-base font-bold text-slate-900">
+          美食助手
+        </h1>
+        <button
+          type="button"
+          onClick={() => void handleNewChat()}
+          aria-label="新建会话"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-emerald-700 transition-colors hover:bg-emerald-50 active:bg-emerald-100"
+        >
+          <Plus size={20} strokeWidth={2} aria-hidden />
+        </button>
+      </header>
       <section
         style={{
           flex: 1,
