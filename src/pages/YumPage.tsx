@@ -455,7 +455,7 @@ export default function YumPage() {
                     {/* <div style={{width: '100%', display: "flex", justifyContent: 'start'}}>
                       <Image width={60} src={robotPng}/>
                     </div> */}
-                    <article className="bg-gray-200 max-w-[360px] rounded-lg p-2">
+                    <article className="bg-gray-100 max-w-[360px] rounded-lg p-2">
                       <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", alignSelf: "stretch", maxWidth: "min(720px, 100%)" }}>
                         {message.content}
                         {message.streaming ? "▍" : null}
@@ -496,7 +496,7 @@ export default function YumPage() {
         </article>
       ) : null} */}
       <section className="fixed bottom-0 left-0 right-0 w-full py-1 px-3 pb-4">
-        <div className="rounded-lg shadow-[0_0_24px_rgba(0,0,0,0.38)]" style={{ paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10, display: 'flex', gap: 10, 
+        <div className="rounded-lg shadow-[0_0_24px_rgba(0,0,0,0.38)] bg-white" style={{ paddingTop: 5, paddingBottom: 5, paddingLeft: 10, paddingRight: 10, display: 'flex', gap: 10, 
           // position: 'fixed', bottom: 10, left: 0, right: 0, width: '100%'
         }}>
           <Input style={{flex: 1}} value={question} onChange={(value) => {

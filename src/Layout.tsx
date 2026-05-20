@@ -28,15 +28,24 @@ export default function Layout() {
           onclick: () => {
             navigate('/fileupload')
           }
-        },
+        },        
+        // {
+        //   key: 'messages',
+        //   title: 'messages',
+        //   icon: <UnorderedListOutline />,
+        //   badge: '5',
+        //   onclick: () => {
+        //     navigate('/messages')
+        //   }
+        // },
         {
-          key: 'messages',
+          key: 'yum',
           title: '对话',
           icon: (active: boolean) =>
             active ? <MessageFill /> : <MessageOutline />,
           badge: '99+',
           onclick: () => {
-            navigate('/messages')
+            navigate('/yum')
           }
         },
         // {
