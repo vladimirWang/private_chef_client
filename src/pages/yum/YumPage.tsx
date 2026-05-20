@@ -4,7 +4,6 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { uploadFile } from "../../api/util";
 import {
-  clearChatHistory,
   getChatMessages,
   type ApiChatHistoryMessage,
   yumChatStream,
@@ -59,6 +58,7 @@ export default function YumPage() {
 
   const [questionLoading, setQuestionLoading] = useState(false);
   const consultStreamAbortRef = useRef<AbortController | null>(null);
+  const yumStreamAbortRef = useRef<AbortController | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageIdCounter = useRef(0);
   // "我体重160斤，尺码推荐"
@@ -66,21 +66,39 @@ export default function YumPage() {
 
   const [result, setResult] = useState<null | string>(null);
 
-  const handleNewChat = async () => {
+  const handleNewChat = useCallback(() => {
     setMenuOpen(false);
-    if (threadId) {
-      try {
-        await clearChatHistory(threadId);
-      } catch (error) {
-        console.error("清空历史失败:", error);
-      }
+
+    if (messages.length > 0) {
+      const firstUser = messages.find((m) => m.role === "user");
+      const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+      const previewText =
+        lastAssistant?.content?.trim() ?? firstUser?.content?.trim() ?? "";
+      upsertChatSession({
+        threadId,
+        title: sessionTitleFromMessage(firstUser?.content ?? "新对话"),
+        preview: previewText.length > 60 ? `${previewText.slice(0, 60)}…` : previewText,
+        updatedAt: Date.now(),
+      });
     }
+
+    consultStreamAbortRef.current?.abort();
+    consultStreamAbortRef.current = null;
+    yumStreamAbortRef.current?.abort();
+    yumStreamAbortRef.current = null;
+
+    setProcessing(false);
+    setQuestionLoading(false);
+    setQuestion(undefined);
+    setResult(null);
+
     const newThreadId = generateUUID();
     localStorage.setItem("thread_id", newThreadId);
     setThreadId(newThreadId);
     setMessages([]);
     messageIdCounter.current = 0;
-  };
+    setHistoryLoading(false);
+  }, [messages, threadId]);
 
   const handleLogout = async () => {
     // 预留：对接登出接口后跳转登录
@@ -166,6 +184,9 @@ export default function YumPage() {
     });
 
     setProcessing(true);
+    yumStreamAbortRef.current?.abort();
+    yumStreamAbortRef.current = new AbortController();
+    const yumController = yumStreamAbortRef.current;
     const assistantMessageId = addMessage({
       role: "assistant",
       content: "",
@@ -173,7 +194,13 @@ export default function YumPage() {
     }).id;
 
     try {
-      await yumChatStream({ message: text || "这是我冰箱里的食物，帮我看看能做什么佳肴？", image_url:imageUrl, thread_id: threadId }, (chunk) => {
+      await yumChatStream(
+        {
+          message: text || "这是我冰箱里的食物，帮我看看能做什么佳肴？",
+          image_url: imageUrl,
+          thread_id: threadId,
+        },
+        (chunk) => {
         console.log("chunk", chunk);
         setMessages((prev) =>
           prev.map((msg) =>
@@ -182,16 +209,25 @@ export default function YumPage() {
               : msg
           )
         );
-      });
+        },
+        { signal: yumController.signal },
+      );
       console.log("yumChatStream done");
     } catch (error) {
-      console.error("聊天失败:", error);
+      const aborted =
+        error instanceof DOMException && error.name === "AbortError";
+      if (!aborted) {
+        console.error("聊天失败:", error);
+      }
       // setMessages((prev) =>
       //   prev.map((msg) =>
       //     msg.id === assistantMessageId ? { ...msg, streaming: false } : msg
       //   )
       // );
     } finally {
+      if (yumStreamAbortRef.current === yumController) {
+        yumStreamAbortRef.current = null;
+      }
       setProcessing(false);
       setMessages((prev) => {
         const firstUser = prev.find((m) => m.role === "user");
@@ -292,7 +328,7 @@ export default function YumPage() {
         </h1>
         <button
           type="button"
-          onClick={() => void handleNewChat()}
+          onClick={handleNewChat}
           aria-label="新建会话"
           className="flex h-9 w-9 items-center justify-center rounded-lg text-emerald-700 transition-colors hover:bg-emerald-50 active:bg-emerald-100"
         >

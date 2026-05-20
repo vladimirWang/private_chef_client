@@ -38,9 +38,7 @@ export default function Drawer(props: DrawerProps) {
           <div className="my-1 h-px bg-slate-200" />
           <button
             type="button"
-            onClick={() => {
-              void handleNewChat();
-            }}
+            onClick={handleNewChat}
             className="flex w-full items-center gap-3 px-4 py-3 text-left text-slate-800 transition-colors hover:bg-slate-50 active:bg-slate-100"
           >
             <Plus size={20} strokeWidth={2} />
