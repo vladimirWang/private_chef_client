@@ -11,7 +11,7 @@ export const userRegister = (data: IUserRegister, config?: { showSuccessMessage?
     })
 }
 
-interface IUserLogin {
+export interface IUserLoginRequest {
     email: string;
     password: string;
     nonce: string;
@@ -19,7 +19,7 @@ interface IUserLogin {
 interface IUserLoginResponse {
     token: string;
 }
-export const userLogin = (data: IUserLogin) => {
+export const userLogin = (data: IUserLoginRequest) => {
     return bunApi.post<IUserLoginResponse>("/user/login", data)
 }
 

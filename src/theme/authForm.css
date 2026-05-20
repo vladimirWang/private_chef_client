@@ -1,0 +1,34 @@
+.auth-mobile-form .adm-list-item {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.auth-mobile-form .adm-list-item-content {
+  border-top: none;
+}
+
+.auth-mobile-form .adm-form-item-label {
+  font-weight: 600;
+  color: #334155;
+  font-size: 14px;
+}
+
+.auth-mobile-form .adm-input {
+  --font-size: 15px;
+  --placeholder-color: #94a3b8;
+  border-radius: 10px;
+  border: 1px solid rgba(5, 150, 105, 0.12);
+  padding: 10px 12px;
+  background: #f8fafc;
+}
+
+.auth-mobile-form .adm-form-item.adm-form-item-horizontal .adm-form-item-label {
+  width: 72px;
+}
+
+.auth-form-hint {
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #64748b;
+}

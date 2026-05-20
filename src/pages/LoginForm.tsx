@@ -1,21 +1,16 @@
 import * as React from "react";
-import { Suspense } from "react";
-import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
-import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  CircularProgress,
-  FormControlLabel,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Button, Form, Input } from "antd-mobile";
 import AuthShell from "@/components/auth/AuthShell";
-import {userLogin, getUserSalt} from '@/api/user'
+import {
+  AuthFormShell,
+  authFormSubmitButtonStyle,
+} from "@/components/auth/AuthFormShell";
+import { userLogin, getUserSalt, type IUserLoginRequest } from "@/api/user";
 import { getNonce } from "@/api/util";
 import { hashPassword } from "@/utils/algo";
+
+const { Item, useForm } = Form;
 
 function postLoginPathFromWindow(search: string): string {
   const raw = new URLSearchParams(search).get("from")?.trim() ?? "";
@@ -25,42 +20,26 @@ function postLoginPathFromWindow(search: string): string {
   return "/";
 }
 
-function RegisteredBanner() {
-  const [params] = useSearchParams();
-  if (params.get("registered") !== "1") {
-    return null;
-  }
-  return <Alert severity="success">注册成功！登录后即可开始 AI 膳食咨询。</Alert>;
-}
-
 export default function LoginForm() {
   const navigate = useNavigate();
   const [search] = useSearchParams();
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [remember, setRemember] = React.useState(false);
+  const [form] = useForm();
   const [submitting, setSubmitting] = React.useState(false);
-  const [formError, setFormError] = React.useState<string | null>(null);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setFormError(null);
+  const handleSubmit = async (value: IUserLoginRequest) => {
     setSubmitting(true);
     try {
       const nonce = await getNonce();
-      console.log("nonce: ", nonce)
-      const salt = await getUserSalt(email.trim())
+      const { email, password } = value;
+      const salt = await getUserSalt(email.trim());
       const passwordHash = await hashPassword(password, nonce, salt);
       const result = await userLogin({
         email: email.trim(),
         password: passwordHash,
-        nonce
-        // remember,
+        nonce,
       });
-      console.log("result: ", result)
-      localStorage.setItem("access_token", result.token)
+      localStorage.setItem("access_token", result.token);
       navigate(postLoginPathFromWindow(search.toString()), { replace: true });
-      // setFormError(result.error);
     } finally {
       setSubmitting(false);
     }
@@ -72,85 +51,38 @@ export default function LoginForm() {
       subtitle="登录后继续与 AI 膳食顾问对话，查看为你定制的成长营养建议与饮食记录。"
       altCta={{ preface: "还没有账号？", label: "免费注册", href: "/landing/register" }}
     >
-      <Box component="form" onSubmit={handleSubmit} noValidate>
-        <Stack spacing={2.5}>
-          <Suspense fallback={null}>
-            <RegisteredBanner />
-          </Suspense>
-          {formError ? (
-            <Alert severity="error" onClose={() => setFormError(null)}>
-              {formError}
-            </Alert>
-          ) : null}
-          <TextField
-            required
-            fullWidth
-            id="email"
-            label="邮箱"
-            name="email"
-            autoComplete="username"
-            autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="用于登录与接收营养报告"
-          />
-          <TextField
-            required
-            fullWidth
-            name="password"
-            label="密码"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="请输入密码"
-          />
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: 1,
-            }}
-          >
-            {/* <FormControlLabel
-              control={
-                <Checkbox
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="记住我"
-            /> */}
-            <Typography
-              variant="body2"
-              component={RouterLink}
-              to="#"
-              sx={{
-                fontWeight: 500,
-                color: "primary.main",
-                textDecoration: "none",
-                "&:hover": { textDecoration: "underline" },
-              }}
+      <AuthFormShell hint="使用注册邮箱登录，即可继续上次的 AI 膳食咨询。">
+        <Form
+          form={form}
+          layout="horizontal"
+          onFinish={handleSubmit}
+          footer={
+            <Button
+              type="submit"
+              block
+              color="primary"
+              loading={submitting}
+              disabled={submitting}
+              style={authFormSubmitButtonStyle}
             >
-              忘记密码？
-            </Typography>
-          </Box>
-          <Button type="submit" fullWidth variant="contained" size="large" disabled={submitting}>
-            {submitting ? (
-              <>
-                <CircularProgress size={20} sx={{ mr: 1 }} color="inherit" />
-                登录中…
-              </>
-            ) : (
-              "登录"
-            )}
-          </Button>
-        </Stack>
-      </Box>
+              登录
+            </Button>
+          }
+        >
+          <Item
+            name="email"
+            rules={[{ required: true, message: "请输入邮箱" }]}
+          >
+            <Input placeholder="输入邮箱" />
+          </Item>
+          <Item
+            name="password"
+            rules={[{ required: true, message: "请输入密码" }]}
+          >
+            <Input type="password" placeholder="输入密码" />
+          </Item>
+        </Form>
+      </AuthFormShell>
     </AuthShell>
   );
 }
