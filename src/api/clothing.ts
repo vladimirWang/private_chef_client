@@ -85,12 +85,12 @@ export const consultKnowledgeBaseStream = (
 
 /** Bun /chat/consult：gRPC 流式透传为 SSE，与 clothing consult 帧格式一致 */
 export async function chatConsultStream(
-  data: { question: string; signal?: AbortSignal },
+  data: { question: string; session_id: string; signal?: AbortSignal },
   onChunk: (chunk: string) => void,
 ): Promise<void> {
   return streamChatNew(
     "/api/chat/consult",
-    { question: data.question },
+    { question: data.question, session_id: data.session_id },
     onChunk,
     data.signal ? { signal: data.signal } : undefined,
   );

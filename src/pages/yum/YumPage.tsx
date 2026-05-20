@@ -94,7 +94,7 @@ export default function YumPage() {
     const loadHistory = async () => {
       setHistoryLoading(true);
       try {
-        const { messages: history } = await getChatMessages();
+        const { messages: history } = await getChatMessages(threadId);
         if (cancelled || !history?.length) return;
         const loaded = historyToMessages(history);
         messageIdCounter.current = loaded.length;
@@ -109,7 +109,7 @@ export default function YumPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [threadId]);
 
   const addMessage = (message: Omit<Message, "id" | "timestamp">) => {
     messageIdCounter.current += 1;
@@ -238,7 +238,7 @@ export default function YumPage() {
       streaming: true,
     }).id;
     try {
-      await chatConsultStream({ question: q, signal }, (chunk) => {
+      await chatConsultStream({ question: q, session_id: threadId, signal }, (chunk) => {
         setMessages((prev) =>
           prev.map((msg) =>
             msg.id === assistantMessageId

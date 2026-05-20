@@ -14,7 +14,7 @@ import {
 
 async function syncSessionFromServer(threadId: string): Promise<ChatSession | null> {
   try {
-    const { messages } = await getChatMessages();
+    const { messages } = await getChatMessages(threadId);
     if (!messages?.length) return null;
     const firstUser = messages.find((m) => m.role === "user");
     const last = messages[messages.length - 1];
