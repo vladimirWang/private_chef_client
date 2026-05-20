@@ -144,6 +144,19 @@ function decodeSseOrRawText(buffer: string): { chunks: string[]; rest: string; d
 //   }
 // }
 
+export type ApiChatSessionItem = {
+  session_id: string;
+  title: string;
+  preview?: string;
+  updated_at_ms: number;
+};
+
+export const getChatSessions = () => {
+  return bunApi.get<{ sessions: ApiChatSessionItem[] }>("/chat/sessions", {
+    showErrorMessage: false,
+  });
+};
+
 export const getChatMessages = (sessionId: string) => {
   return bunApi.get<{ messages: ApiChatHistoryMessage[] }>("/chat/messages", {
     params: { session_id: sessionId },

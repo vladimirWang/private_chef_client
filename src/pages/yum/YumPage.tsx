@@ -66,21 +66,47 @@ export default function YumPage() {
 
   const [result, setResult] = useState<null | string>(null);
 
+  const persistCurrentSession = useCallback(() => {
+    if (messages.length === 0) return;
+    const firstUser = messages.find((m) => m.role === "user");
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
+    const previewText =
+      lastAssistant?.content?.trim() ?? firstUser?.content?.trim() ?? "";
+    upsertChatSession({
+      threadId,
+      title: sessionTitleFromMessage(firstUser?.content ?? "新对话"),
+      preview: previewText.length > 60 ? `${previewText.slice(0, 60)}…` : previewText,
+      updatedAt: Date.now(),
+    });
+  }, [messages, threadId]);
+
+  const handleSelectSession = useCallback(
+    (sessionId: string) => {
+      if (sessionId === threadId) {
+        setMenuOpen(false);
+        return;
+      }
+      persistCurrentSession();
+      consultStreamAbortRef.current?.abort();
+      consultStreamAbortRef.current = null;
+      yumStreamAbortRef.current?.abort();
+      yumStreamAbortRef.current = null;
+      setProcessing(false);
+      setQuestionLoading(false);
+      setQuestion(undefined);
+      localStorage.setItem("thread_id", sessionId);
+      setThreadId(sessionId);
+      setMessages([]);
+      messageIdCounter.current = 0;
+      setMenuOpen(false);
+    },
+    [threadId, persistCurrentSession],
+  );
+
   const handleNewChat = useCallback(() => {
     setMenuOpen(false);
 
-    if (messages.length > 0) {
-      const firstUser = messages.find((m) => m.role === "user");
-      const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-      const previewText =
-        lastAssistant?.content?.trim() ?? firstUser?.content?.trim() ?? "";
-      upsertChatSession({
-        threadId,
-        title: sessionTitleFromMessage(firstUser?.content ?? "新对话"),
-        preview: previewText.length > 60 ? `${previewText.slice(0, 60)}…` : previewText,
-        updatedAt: Date.now(),
-      });
-    }
+    persistCurrentSession();
 
     consultStreamAbortRef.current?.abort();
     consultStreamAbortRef.current = null;
@@ -98,7 +124,7 @@ export default function YumPage() {
     setMessages([]);
     messageIdCounter.current = 0;
     setHistoryLoading(false);
-  }, [messages, threadId]);
+  }, [persistCurrentSession]);
 
   const handleLogout = async () => {
     // 预留：对接登出接口后跳转登录
@@ -113,7 +139,12 @@ export default function YumPage() {
       setHistoryLoading(true);
       try {
         const { messages: history } = await getChatMessages(threadId);
-        if (cancelled || !history?.length) return;
+        if (cancelled) return;
+        if (!history?.length) {
+          setMessages([]);
+          messageIdCounter.current = 0;
+          return;
+        }
         const loaded = historyToMessages(history);
         messageIdCounter.current = loaded.length;
         setMessages(loaded);
@@ -267,6 +298,12 @@ export default function YumPage() {
       role: "user",
       content: q,
     });
+    upsertChatSession({
+      threadId,
+      title: sessionTitleFromMessage(q),
+      preview: q,
+      updatedAt: Date.now(),
+    });
     console.log("start");
     const assistantMessageId = addMessage({
       role: "assistant",
@@ -283,11 +320,22 @@ export default function YumPage() {
           )
         );
       });
-      setMessages((prev) =>
-        prev.map((msg) =>
+      setMessages((prev) => {
+        const updated = prev.map((msg) =>
           msg.id === assistantMessageId ? { ...msg, streaming: false } : msg
-        )
-      );
+        );
+        const lastAssistant = updated.find((m) => m.id === assistantMessageId);
+        const preview = lastAssistant?.content?.trim() ?? "";
+        if (preview) {
+          upsertChatSession({
+            threadId,
+            title: sessionTitleFromMessage(q),
+            preview: preview.length > 60 ? `${preview.slice(0, 60)}…` : preview,
+            updatedAt: Date.now(),
+          });
+        }
+        return updated;
+      });
       console.log("complete");
     } catch (error) {
       const aborted =
@@ -299,7 +347,7 @@ export default function YumPage() {
       if (consultStreamAbortRef.current === controller) {
         consultStreamAbortRef.current = null;
       }
-      // setQuestionLoading(false);
+      setQuestionLoading(false);
     }
   };
 
@@ -312,7 +360,13 @@ export default function YumPage() {
         flexDirection: "column",
       }}
     >
-      <Drawer menuOpen={menuOpen} setMenuOpen={setMenuOpen} handleNewChat={handleNewChat} />
+      <Drawer
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+        activeSessionId={threadId}
+        handleNewChat={handleNewChat}
+        onSelectSession={handleSelectSession}
+      />
 
       <header className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-3 py-2.5">
         <button
