@@ -21,14 +21,21 @@ export default function Layout() {
         //   badge: Badge.dot,
         },
         {
-          key: 'todo',
-          title: '知识库',
+          key: 'gallery',
+          title: '菜品',
           icon: <UnorderedListOutline />,
-          badge: '5',
           onclick: () => {
-            navigate('/fileupload')
+            navigate('/gallery')
           }
-        },        
+        },
+        {
+          key: 'dish-upload',
+          title: '发布',
+          icon: <UserOutline />,
+          onclick: () => {
+            navigate('/dish/upload')
+          }
+        },
         // {
         //   key: 'messages',
         //   title: 'messages',

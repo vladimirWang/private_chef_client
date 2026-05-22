@@ -2,6 +2,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, use
 import { Button, Divider, Input, Modal } from "antd-mobile";
 import { sendEmailVerificationCode, verifyEmail } from "@/api/util";
 import { CheckCircleOutline } from 'antd-mobile-icons';
+import { toast } from "react-hot-toast";
 
 interface EmailVerificationProps {
   email: string;
@@ -40,8 +41,14 @@ function EmailVerification(
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const [loading, setLoading] = useState(false);
   const handleSend = async () => {
-        setVisible(true);
-        setLoading(true)
+    const emailRegex = /^[\w.-]+@[\w.-]+\.\w+$/
+    if (!emailRegex.test(props.email)) {
+      toast.error("请输入有效的邮箱地址");
+      return
+    }
+    setVisible(true);
+    setLoading(true)
+    console.log("Sending email verification code to:", props.email);
     try {
         await sendEmailVerificationCode(props.email)
     } finally {

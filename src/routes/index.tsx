@@ -8,6 +8,7 @@ import Layout from "@/Layout";
 import NotFound from "@/pages/NotFound";
 const yumPageLazy = lazy(() => import("@/pages/yum/YumPage"));
 const fileuploadPageLazy = lazy(() => import("@/pages/FileuploadPage"));
+const dishUploadPageLazy = lazy(() => import("@/pages/DishUploadPage"));
 const galleryPageLazy = lazy(() => import("@/pages/GalleryPage"));
 const messagesPageLazy = lazy(() => import("@/pages/MessagesPage"));
 
@@ -23,6 +24,10 @@ export const routes: RouteObject[] = [
             {
                 path: "gallery",
                 Component: galleryPageLazy
+            },
+            {
+                path: "dish/upload",
+                Component: dishUploadPageLazy
             },
             {
                 path: "fileupload",

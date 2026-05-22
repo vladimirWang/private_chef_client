@@ -5,7 +5,6 @@ import remarkGfm from "remark-gfm";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
 import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
 import { HOME_CARD_SHADOW } from "@/theme/homeChrome";
 
 interface ChatMessageProps {
@@ -70,173 +69,94 @@ export function ChatMessage({ message }: ChatMessageProps) {
           }}
         >
           {message.imageUrl && (
-            <Box
-              component="img"
+            <img
               src={message.imageUrl}
               alt="上传的图片"
-              sx={{
-                borderRadius: 2,
-                mb: 1,
-                maxWidth: 192,
-                objectFit: "cover",
-                display: "block",
-              }}
+              className="mb-1 block max-w-48 rounded-lg object-cover"
             />
           )}
           {isUser ? (
-            <Typography
-              component="div"
-              variant="body2"
-              sx={{ whiteSpace: "pre-wrap", lineHeight: 1.6 }}
-            >
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">
               {typeof message.content === "string"
                 ? message.content
                 : JSON.stringify(message.content)}
-            </Typography>
+            </div>
           ) : (
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
+              className="prose prose-sm max-w-none text-sm prose-headings:font-bold prose-h1:mb-2 prose-h1:mt-4 prose-h1:text-lg prose-h2:mb-2 prose-h2:mt-4 prose-h2:text-base prose-h3:mb-1 prose-h3:mt-3 prose-h3:text-sm prose-h3:font-semibold prose-p:mb-2 prose-p:last:mb-0 prose-ul:mb-2 prose-ul:list-disc prose-ul:pl-5 prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-5 prose-li:mb-0.5 prose-a:text-blue-600 prose-a:underline prose-strong:font-semibold prose-em:italic prose-code:rounded prose-code:bg-gray-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:font-mono prose-code:text-[0.8125rem] prose-pre:mb-2 prose-pre:overflow-auto prose-pre:rounded-lg prose-pre:bg-gray-100 prose-pre:p-3 prose-pre:text-[0.8125rem] prose-blockquote:border-l-4 prose-blockquote:border-blue-300 prose-blockquote:pl-3 prose-blockquote:italic prose-blockquote:text-gray-600 prose-table:mb-3 prose-table:w-full prose-table:border-collapse prose-table:text-sm prose-th:border prose-th:border-gray-200 prose-th:px-3 prose-th:py-2 prose-th:text-left prose-th:font-semibold prose-td:border prose-td:border-gray-200 prose-td:px-3 prose-td:py-2 prose-thead:bg-gray-100"
               components={{
                 h1: ({ children }) => (
-                  <Typography component="h1" variant="h6" sx={{ fontWeight: 700, mb: 1, mt: 2 }}>
-                    {children}
-                  </Typography>
+                  <h1 className="mb-2 mt-4 text-lg font-bold">{children}</h1>
                 ),
                 h2: ({ children }) => (
-                  <Typography component="h2" variant="subtitle1" sx={{ fontWeight: 700, mb: 1, mt: 2 }}>
-                    {children}
-                  </Typography>
+                  <h2 className="mb-2 mt-4 text-base font-bold">{children}</h2>
                 ),
                 h3: ({ children }) => (
-                  <Typography component="h3" variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, mt: 1.5 }}>
-                    {children}
-                  </Typography>
+                  <h3 className="mb-1 mt-3 text-sm font-semibold">{children}</h3>
                 ),
                 p: ({ children }) => (
-                  <Typography component="p" variant="body2" sx={{ mb: 1, "&:last-child": { mb: 0 } }}>
-                    {children}
-                  </Typography>
+                  <p className="mb-2 text-sm last:mb-0">{children}</p>
                 ),
                 ul: ({ children }) => (
-                  <Box component="ul" sx={{ pl: 2.5, mb: 1, listStyleType: "disc" }}>
-                    {children}
-                  </Box>
+                  <ul className="mb-2 list-disc pl-5">{children}</ul>
                 ),
                 ol: ({ children }) => (
-                  <Box component="ol" sx={{ pl: 2.5, mb: 1, listStyleType: "decimal" }}>
-                    {children}
-                  </Box>
+                  <ol className="mb-2 list-decimal pl-5">{children}</ol>
                 ),
                 li: ({ children }) => (
-                  <Typography component="li" variant="body2" sx={{ mb: 0.5, display: "list-item" }}>
-                    {children}
-                  </Typography>
+                  <li className="mb-0.5 text-sm">{children}</li>
                 ),
                 a: ({ href, children }) => (
-                  <Typography
-                    component="a"
-                    variant="body2"
+                  <a
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    sx={{ color: "primary.main", textDecoration: "underline" }}
+                    className="text-sm text-blue-600 underline"
                   >
                     {children}
-                  </Typography>
+                  </a>
                 ),
                 strong: ({ children }) => (
-                  <Typography component="strong" variant="body2" sx={{ fontWeight: 600 }}>
-                    {children}
-                  </Typography>
+                  <strong className="text-sm font-semibold">{children}</strong>
                 ),
                 em: ({ children }) => (
-                  <Typography component="em" variant="body2" sx={{ fontStyle: "italic" }}>
-                    {children}
-                  </Typography>
+                  <em className="text-sm italic">{children}</em>
                 ),
                 code: ({ children }) => (
-                  <Box
-                    component="code"
-                    sx={{
-                      bgcolor: "action.hover",
-                      px: 0.75,
-                      py: 0.25,
-                      borderRadius: 1,
-                      fontFamily: "monospace",
-                      fontSize: "0.8125rem",
-                    }}
-                  >
+                  <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[0.8125rem]">
                     {children}
-                  </Box>
+                  </code>
                 ),
                 pre: ({ children }) => (
-                  <Box
-                    component="pre"
-                    sx={{
-                      bgcolor: "action.hover",
-                      p: 1.5,
-                      borderRadius: 2,
-                      overflow: "auto",
-                      mb: 1,
-                      fontSize: "0.8125rem",
-                    }}
-                  >
+                  <pre className="mb-2 overflow-auto rounded-lg bg-gray-100 p-3 text-[0.8125rem]">
                     {children}
-                  </Box>
+                  </pre>
                 ),
                 blockquote: ({ children }) => (
-                  <Box
-                    component="blockquote"
-                    sx={{
-                      borderLeft: 4,
-                      borderColor: "primary.light",
-                      pl: 1.5,
-                      fontStyle: "italic",
-                      color: "text.secondary",
-                      mb: 1,
-                    }}
-                  >
+                  <blockquote className="mb-2 border-l-4 border-blue-300 pl-3 italic text-gray-600">
                     {children}
-                  </Box>
+                  </blockquote>
                 ),
                 table: ({ children }) => (
-                  <Box
-                    component="table"
-                    sx={{ width: "100%", borderCollapse: "collapse", mb: 1.5, fontSize: "0.875rem" }}
-                  >
+                  <table className="mb-3 w-full border-collapse text-sm">
                     {children}
-                  </Box>
+                  </table>
                 ),
                 thead: ({ children }) => (
-                  <Box component="thead" sx={{ bgcolor: "action.hover" }}>
-                    {children}
-                  </Box>
+                  <thead className="bg-gray-100">{children}</thead>
                 ),
-                tbody: ({ children }) => <Box component="tbody">{children}</Box>,
+                tbody: ({ children }) => <tbody>{children}</tbody>,
                 tr: ({ children }) => (
-                  <Box component="tr" sx={{ borderBottom: "1px solid", borderColor: "divider" }}>
-                    {children}
-                  </Box>
+                  <tr className="border-b border-gray-200">{children}</tr>
                 ),
                 th: ({ children }) => (
-                  <Box
-                    component="th"
-                    sx={{
-                      border: "1px solid",
-                      borderColor: "divider",
-                      px: 1.5,
-                      py: 1,
-                      textAlign: "left",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="border border-gray-200 px-3 py-2 text-left font-semibold">
                     {children}
-                  </Box>
+                  </th>
                 ),
                 td: ({ children }) => (
-                  <Box component="td" sx={{ border: "1px solid", borderColor: "divider", px: 1.5, py: 1 }}>
-                    {children}
-                  </Box>
+                  <td className="border border-gray-200 px-3 py-2">{children}</td>
                 ),
               }}
             >

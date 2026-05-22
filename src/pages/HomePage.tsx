@@ -3,7 +3,6 @@ import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
-import Typography from "@mui/material/Typography";
 import { Link } from "react-router-dom";
 import homeFood from "@/assets/home-food.jpg";
 import homeClothing from "@/assets/home-clothing.jpg";
@@ -45,12 +44,8 @@ import WatterFall from "@/components/WaterFall";
 //             sx={{ objectFit: "cover" }}
 //           />
 //           <CardContent sx={{ p: 3 }}>
-//             <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
-//               美食
-//             </Typography>
-//             <Typography variant="body2" color="text.secondary">
-//               美食助手与相关能力入口
-//             </Typography>
+//             <h2 className="mb-2 text-2xl font-bold">美食</h2>
+//             <p className="text-sm text-gray-500">美食助手与相关能力入口</p>
 //           </CardContent>
 //         </CardActionArea>
 //       </Card>
@@ -72,12 +67,8 @@ import WatterFall from "@/components/WaterFall";
 //             sx={{ objectFit: "cover" }}
 //           />
 //           <CardContent sx={{ p: 3 }}>
-//             <Typography variant="h5" component="h2" gutterBottom sx={{ fontWeight: 700 }}>
-//               资料上传
-//             </Typography>
-//             <Typography variant="body2" color="text.secondary">
-//               资料上传入口
-//             </Typography>
+//             <h2 className="mb-2 text-2xl font-bold">资料上传</h2>
+//             <p className="text-sm text-gray-500">资料上传入口</p>
 //           </CardContent>
 //         </CardActionArea>
 //       </Card>

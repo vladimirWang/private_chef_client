@@ -1,7 +1,9 @@
 :root {
   --adm-color-primary: #86e7b8;
+  --adm-color-text: #333333;
 }
 
 html[data-prefers-color-scheme="dark"] {
   --adm-color-primary: #86e7b8;
+  --adm-color-text: #e6e6e6;
 }

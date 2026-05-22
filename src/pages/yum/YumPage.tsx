@@ -14,7 +14,6 @@ import {
   upsertChatSession,
 } from "@/utils/chatSessions";
 import { Plus, Menu, User } from "lucide-react";
-import Typography from "@mui/material/Typography";
 import { streamChat } from "@/utils/streamChat";
 import { streamChatNew } from "@/utils/streamChatNew";
 import { consultKnowledgeBaseStream, updateKnowledgeBase, chatConsultStream } from "@/api/clothing";
@@ -384,7 +383,7 @@ export default function YumPage() {
           type="button"
           onClick={handleNewChat}
           aria-label="新建会话"
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-emerald-700 transition-colors hover:bg-emerald-50 active:bg-emerald-100"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--adm-color-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--adm-color-primary)_18%,transparent)] active:bg-[color-mix(in_srgb,var(--adm-color-primary)_28%,transparent)]"
         >
           <Plus size={20} strokeWidth={2} aria-hidden />
         </button>
@@ -399,13 +398,11 @@ export default function YumPage() {
         }}
       >
         {historyLoading ? (
-          <Typography variant="body2" sx={{ color: "text.secondary", textAlign: "center", py: 3 }}>
-            加载对话中…
-          </Typography>
+          <p className="py-3 text-center text-sm text-gray-500">加载对话中…</p>
         ) : messages.length === 0 ? (
-          <Typography variant="body2" sx={{ color: "text.secondary", textAlign: "center", py: 3 }}>
+          <p className="py-3 text-center text-sm text-gray-500">
             暂无对话，输入问题开始咨询
-          </Typography>
+          </p>
         ) : (
           messages.map((message) => {
             return (
@@ -416,11 +413,11 @@ export default function YumPage() {
                     {/* <div style={{width: '100%', display: "flex", justifyContent: 'start'}}>
                       <Image width={60} src={robotPng}/>
                     </div> */}
-                    <article className="bg-gray-100 max-w-[360px] rounded-lg p-2">
-                      <Typography variant="body1" sx={{ whiteSpace: "pre-wrap", alignSelf: "stretch", maxWidth: "min(720px, 100%)" }}>
+                    <article className="max-w-[360px] rounded-lg bg-gray-100 p-2">
+                      <p className="max-w-[min(720px,100%)] whitespace-pre-wrap text-base">
                         {message.content}
                         {message.streaming ? "▍" : null}
-                      </Typography>
+                      </p>
                     </article>
                   </>
                   :
@@ -434,13 +431,12 @@ export default function YumPage() {
                     }}
                   >
                     {/* <Image width={60} src={userPng} /> */}
-                    <article style={{ maxWidth: "min(720px, 100%)" }} className="bg-emerald-300 rounded-lg p-2">
-                      <Typography
-                        variant="body1"
-                        sx={{ whiteSpace: "pre-wrap", textAlign: "right" }}
-                      >
+                    <article
+                      className="max-w-[min(720px,100%)] rounded-lg bg-[var(--adm-color-primary)] p-2 text-[var(--adm-color-text)]"
+                    >
+                      <p className="whitespace-pre-wrap text-right text-base text-[var(--adm-color-text)]">
                         {message.content}
-                      </Typography>
+                      </p>
                     </article>
                   </div>
                 }
