@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef, useCallback, type ChangeEvent } from "react";
 import type { Message } from "@/types/chat";
-import { ChatMessage } from "@/components/ChatMessage";
-import { ChatInput } from "@/components/ChatInput";
 import { uploadFile } from "../../api/util";
 import {
   getChatMessages,
